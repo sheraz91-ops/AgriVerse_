@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriVerse - Intelligent Farming Platform</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Base styles handled dynamically by JS for language direction */
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .glass-nav { 
+            background: rgba(2, 44, 34, 0.85); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+        }
+
+        .glass-panel {
+            background: rgba(6, 78, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-panel-hover:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(251, 191, 36, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-scan {
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+
+        .mesh-gradient {
+            background-color: #022c22;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(158,82%,25%,0.3) 0, transparent 50%), 
+                radial-gradient(at 50% 100%, hsla(45, 90%, 45%, 0.15) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(150,100%,30%,0.2) 0, transparent 50%);
+        }
+
+        .play-btn-Verse {
+            animation: playVerse 2s infinite;
+        }
+        @keyframes playVerse {
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(251, 191, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #022c22; }
+        ::-webkit-scrollbar-thumb { background: #059669; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #047857; }
+    </style>
+</head>
+<body class="bg-[#022c22] text-[#ecfdf5] overflow-x-hidden selection:bg-amber-500 selection:text-black font-['Plus_Jakarta_Sans']">
+
+    <div id="app"></div>
+
+    <script>
+    (function() {
+        // --- 1. MASTER TRANSLATION DATA ---
+        const t = {
+            nav: {
+                home: { en: "Home", ur: "ہوم" },
+                features: { en: "Features", ur: "خصوصیات" },
+                scan: { en: "AI Scan", ur: "اسکین" },
+                pricing: { en: "Pricing", ur: "قیمت" },
+                contact: { en: "Help Center", ur: "مدد" }, // Updated from Code 2
+                profile: { en: "Profile", ur: "پروفائل" },
+                dashboard: { en: "Dashboard", ur: "ڈیش بورڈ" },
+            },
+            hero: {
+                badge: { en: "New: AI Pest Detection 2.0", ur: "نیا: AI سے کیڑوں کی پہچان" }, // Updated from Code 2
+                title1: { en: "AgriVerse: Future of", ur: "ایگرو پلس: مستقبل کی" },
+                title2: { en: "Precision Farming", ur: "جدید کاشتکاری" },
+                sub: { en: "AI-Powered Insights for Maximum Yield", ur: "زیادہ پیداوار کے لیے مصنوعی ذہانت" },
+                desc: { 
+                    en: "Transform your farm with satellite monitoring, disease detection, and direct market access. The smartest tool for the Pakistani farmer.", 
+                    ur: "سیٹلائٹ مانیٹرنگ، بیماریوں کی تشخیص اور مارکیٹ تک براہ راست رسائی کے ساتھ اپنے فارم کو تبدیل کریں۔ پاکستانی کسان کے لیے بہترین آلہ۔" 
+                },
+                btnStart: { en: "Start Free Scan", ur: "مفت اسکین شروع کریں" },
+                btnDemo: { en: "Watch Demo", ur: "ڈیمو دیکھیں" },
+            },
+            features: {
+                heading: { en: "Powerful Features", ur: "طاقتور خصوصیات" },
+                subheading: { en: "Everything you need to grow better", ur: "بہتر پیداوار کے لیے سب کچھ" },
+                list: [
+                    { title: { en: "Instant Detection", ur: "فوری شناخت" }, desc: { en: "Detects 50+ crop diseases in seconds.", ur: "سیکنڈوں میں 50+ بیماریوں کی تشخیص۔" }, icon: "scan-line" },
+                    { title: { en: "Live Market Prices", ur: "لائیو مارکیٹ ریٹس" }, desc: { en: "Real-time rates from Punjab & Sindh mandis.", ur: "پنجاب اور سندھ کی منڈیوں سے تازہ ترین ریٹس۔" }, icon: "trending-up" },
+                    { title: { en: "Weather Guidance", ur: "موسم کی رہنمائی" }, desc: { en: "Hyper-local weather forecasts.", ur: "مقامی موسم کی پیشن گوئی۔" }, icon: "cloud-rain" },
+                    { title: { en: "Urdu Support", ur: "اردو زبان" }, desc: { en: "Full app available in local language.", ur: "پوری ایپ مقامی زبان میں دستیاب ہے۔" }, icon: "languages" },
+                ]
+            },
+            video: {
+                heading: { en: "See AgriVerse in Action", ur: "ایگرو پلس کو استعمال کرتے ہوئے دیکھیں" },
+                sub: { en: "From scanning leaves to checking mandi rates, see how easy it is.", ur: "پتوں کو اسکین کرنے سے لے کر منڈی کے نرخ چیک کرنے تک، دیکھیں کہ یہ کتنا آسان ہے۔" },
+                play: { en: "Play Video", ur: "ویڈیو چلائیں" }
+            },
+            scan: {
+                heading: { en: "AI Crop Doctor", ur: "AI فصل کا ڈاکٹر" },
+                subheading: { en: "Instant Disease & Pest Diagnosis", ur: "بیماری اور کیڑوں کی فوری تشخیص" },
+                desc: { en: "Upload a photo to detect pests and diseases instantly.", ur: "کیڑوں اور بیماریوں کی فوری تشخیص کے لیے تصویر اپ لوڈ کریں۔" },
+                selectMode: { en: "Step 1: What to detect?", ur: "پہلا مرحلہ: کیا تلاش کریں؟" },
+                optDisease: { en: "Disease Only", ur: "صرف بیماری" },
+                optPest: { en: "Pests Only", ur: "صرف کیڑے" },
+                optBoth: { en: "Both (All in One)", ur: "دونوں (سب کچھ)" },
+                tryDemo: { en: "Or try a quick demo:", ur: "یا یہ ڈیمو تصاویر آزمائیں:" },
+                upload: { en: "Tap to Upload Photo", ur: "تصویر اپ لوڈ کرنے کے لیے کلک کریں" },
+                analyzing: { en: "Analyzing Crop Health...", ur: "فصل کی صحت کا جائزہ لیا جا رہا ہے..." },
+                resultTitle: { en: "Diagnosis Report", ur: "تشخیص کی رپورٹ" },
+                scanAgain: { en: "Scan Another", ur: "دوبارہ اسکین کریں" },
+                treatment: { en: "Recommended Cure", ur: "تجویز کردہ علاج" },
+                demo1: { en: "Cotton (Pest)", ur: "کپاس (کیڑا)" },
+                demo2: { en: "Wheat (Disease)", ur: "گندم (بیماری)" },
+                demo3: { en: "Tomato (Both)", ur: "ٹماٹر (مکس)" },
+            },
+            expert: {
+                heading: { en: "Need Urgent Help?", ur: "فوری مدد چاہیے؟" },
+                sub: { en: "Talk directly to our Agriculture Expert via Call or WhatsApp.", ur: "ہمارے زرعی ماہر سے براہ راست کال یا واٹس ایپ پر بات کریں۔" },
+                call: { en: "Call Now", ur: "ابھی کال کریں" },
+                chat: { en: "WhatsApp", ur: "واٹس ایپ" }
+            },
+            pricing: {
+                heading: { en: "Affordable Plans", ur: "سستے پیکجز" },
+                subheading: { en: "Start for free, upgrade for precision.", ur: "مفت شروع کریں، درستگی کے لیے اپ گریڈ کریں۔" },
+                p1Name: { en: "Kisan Basic", ur: "کسان بیسک" },
+                p1Price: { en: "Free", ur: "مفت" },
+                p1Duration: { en: "/ forever", ur: "/ ہمیشہ کے لیے" },
+                p1Desc: { en: "Essential tools for small farmers to get started.", ur: "چھوٹے کسانوں کے لیے ضروری اوزار۔" },
+                p2Name: { en: "Agri Pro", ur: "ایگری پرو" },
+                p2Price: { en: "Rs 1,500", ur: "1,500 روپے" },
+                p2Duration: { en: "/ month", ur: "/ ماہ" },
+                p2Desc: { en: "Advanced analytics for maximizing yield.", ur: "پیداوار بڑھانے کے لیے جدید تجزیات۔" },
+                p3Name: { en: "Enterprise", ur: "انٹرپرائز" },
+                p3Price: { en: "Custom", ur: "حسب ضرورت" },
+                p3Desc: { en: "For large landowners and government bodies.", ur: "بڑے زمین دار اور حکومتی اداروں کے لیے۔" },
+                btn1: { en: "Get Started", ur: "شروع کریں" },
+                btn2: { en: "Subscribe Now", ur: "ابھی رکنیت اختیار کریں" },
+                btn3: { en: "Contact Sales", ur: "سیلز سے رابطہ کریں" },
+                popular: { en: "MOST POPULAR", ur: "سب سے مقبول" },
+                f1: { en: "Weather Alerts", ur: "موسم کی خبریں" },
+                f2: { en: "Mandi Rates", ur: "منڈی کے نرخ" },
+                f3: { en: "5 AI Leaf Scans/mo", ur: "5 ای آئی پتوں کی اسکین / ماہ" },
+                f4: { en: "Community Forum", ur: "کمیونٹی فورم" },
+                f5: { en: "Everything in Basic", ur: "بیسک میں سب کچھ" },
+                f6: { en: "Unlimited AI Scans", ur: "لامحدود ای آئی اسکین" },
+                f7: { en: "PDF Reports", ur: "پی ڈی ایف رپورٹس" },
+                f8: { en: "Expert Chat Support", ur: "ماہر چیٹ سپورٹ" },
+                f9: { en: "Disease History", ur: "بیماری کی تاریخ" },
+                f10: { en: "Drone Pilot Dispatch", ur: "ڈرون پائلٹ ڈسپیچ" },
+                f11: { en: "NDVI Spectral Maps", ur: "NDVI سپیکٹرل نقشے" },
+                f12: { en: "Soil Lab Testing", ur: "مٹی کی لیب جانچ" },
+                f13: { en: "API Access", ur: "API رسائی" },
+                f14: { en: "Dedicated Account Manager", ur: "وقف شدہ اکاؤنٹ مینیجر" },
+            },
+            dashboard: {
+                welcome: { en: "My Farm", ur: "میرا فارم" },
+                user: { en: "Ali Ahmed's Farm", ur: "علی احمد کا فارم" },
+                location: { en: "Bahawalpur, PK", ur: "بہاولپور، پاکستان" },
+                weather: { en: "Weather", ur: "موسم" },
+                humidity: { en: "Humidity", ur: "نمی" },
+                mandi: { en: "Market Rates (LHR)", ur: "مارکیٹ ریٹس (لاہور)" },
+                avg: { en: "Trend", ur: "رجحان" },
+                satellite: { en: "SATELLITE VIEW", ur: "سیٹلائٹ ویو" },
+                fieldA: { en: "Block A (Wheat)", ur: "بلاک A (گندم)" },
+                fieldB: { en: "Block B (Empty)", ur: "بلاک B (خالی)" },
+                fieldC: { en: "Block C (Watering)", ur: "بلاک C (پانی)" },
+                soil: { en: "Soil Moisture", ur: "مٹی کی نمی" },
+                adequate: { en: "Good", ur: "اچھا" },
+                target: { en: "Goal", ur: "ہدف" },
+                spray: { en: "Spray Condition", ur: "سپرے کی حالت" },
+                notSuitable: { en: "UNSAFE", ur: "غیر محفوظ" },
+                windHigh: { en: "High Wind Speed", ur: "تیز ہوا" },
+                alerts: { en: "Urgent Alerts", ur: "اہم انتباہات" },
+                alert1Title: { en: "Locust Alert", ur: "ٹڈی دل کا خطرہ" },
+                alert1Desc: { en: "Locust activity seen 50km away.", ur: "50 کلومیٹر دور ٹڈی دل کی سرگرمی۔" },
+                alert2Title: { en: "Water Stress", ur: "پانی کی کمی" },
+                alert2Desc: { en: "Irrigate Block A tomorrow.", ur: "بلاک A کو کل پانی دیں۔" },
+            },
+            contact: {
+                heading: { en: "Help Center", ur: "مدد کا مرکز" },
+                desc: { en: "We are here to help you 24/7", ur: "ہم 24/7 آپ کی مدد کے لیے موجود ہیں" },
+                helpline: { en: "Helpline", ur: "ہیلپ لائن" },
+                email: { en: "Email Support", ur: "ای میل سپورٹ" },
+                office: { en: "Head Office", ur: "ہیڈ آفس" },
+                formName: { en: "Your Name", ur: "آپ کا نام" },
+                formEmail: { en: "Phone / Email", ur: "فون / ای میل" },
+                formMsg: { en: "Message", ur: "پیغام" },
+                btnSend: { en: "Send Message", ur: "پیغام بھیجیں" }
+            },
+            signup: {
+                heading: { en: "Create AgriVerse Account", ur: "ایگرو پلس اکاؤنٹ بنائیں" },
+                step1Title: { en: "1. Personal Details", ur: "1. ذاتی تفصیلات" },
+                step2Title: { en: "2. Farm Details", ur: "2. فارم کی تفصیلات" },
+                step3Title: { en: "3. Finalize & Complete", ur: "3. حتمی مراحل اور تکمیل" },
+                next: { en: "Next: Farm Details", ur: "اگلا: فارم کی تفصیلات" },
+                confirm: { en: "Confirm & Create Account", ur: "تصدیق اور اکاؤنٹ بنائیں" },
+                fname: { en: "First Name", ur: "نام" },
+                lname: { en: "Last Name", ur: "سرنام" },
+                email: { en: "Email Address", ur: "ای میل ایڈریس" },
+                phone: { en: "Phone Number", ur: "فون نمبر" },
+                fatherName: { en: "Father's Name", ur: "والد کا نام" },
+                cnic: { en: "CNIC Number", ur: "شناخت نمبر" },
+                password: { en: "Set Password", ur: "پاس ورڈ سیٹ کریں" },
+                confirmPassword: { en: "Confirm Password", ur: "پاس ورڈ کی تصدیق" },
+                cropSelect: { en: "Select Primary Crop", ur: "بنیادی فصل منتخب کریں" },
+                irrigationSelect: { en: "Select Irrigation Type", ur: "آبپاشی کی قسم منتخب کریں" },
+                landSize: { en: "Land Size (Acres)", ur: "زمین کا رقبہ (ایکڑ)" },
+                district: { en: "District", ur: "ضلع" },
+                terms: { en: "I agree to the terms and conditions.", ur: "میں شرائط و ضوابط سے متفق ہوں۔" },
+            },
+            demo: {
+                heading: { en: "How to Use AgriVerse", ur: "ایگرو پلس کو کیسے استعمال کریں" },
+                desc: { en: "Learn how Pakistani farmers are using AgriVerse to increase yield and save time.", ur: "دیکھیں کہ پاکستانی کسان ایگرو پلس کا استعمال کر کے پیداوار کیسے بڑھا رہے ہیں۔" },
+                lesson1: { en: "Scanning Crops", ur: "فصلوں کی اسکین کریں" },
+                lesson2: { en: "Checking Market Rates", ur: "مارکیٹ کے نرخ دیکھیں" },
+                lesson3: { en: "Weather & Alerts", ur: "موسم اور انتباہات" },
+                lesson4: { en: "Consulting Experts", ur: "ماہرین سے مشورہ" },
+            },
+            mandiRates: {
+                heading: { en: "Mandi Rates", ur: "منڈی کے نرخ" },
+                subheading: { en: "Compare crop prices across multiple mandis", ur: "مختلف منڈیوں میں فصلوں کی قیمتوں کا موازنہ کریں" },
+                mode1: { en: "1 Crop, Multiple Mandis", ur: "1 فصل، متعدد منڈیاں" },
+                mode2: { en: "Multiple Crops, 1 Mandi", ur: "متعدد فصلیں، 1 منڈی" },
+                mode3: { en: "Multiple Crops & Mandis", ur: "متعدد فصلیں اور منڈیاں" },
+                selectCrop: { en: "Select Crop", ur: "فصل منتخب کریں" },
+                selectMandi: { en: "Select Mandi", ur: "منڈی منتخب کریں" },
+                currentRate: { en: "Current Rate", ur: "موجودہ نرخ" },
+                trend: { en: "Trend", ur: "رجحان" },
+                unit: { en: "Unit", ur: "یونٹ" },
+                lastUpdated: { en: "Last Updated", ur: "آخری اپڈیٹ" },
+                highPrice: { en: "High", ur: "زیادہ سے زیادہ" },
+                lowPrice: { en: "Low", ur: "کم سے کم" },
+                noSelection: { en: "Please select at least one crop and one mandi", ur: "براہ کرم کم از کم ایک فصل اور ایک منڈی منتخب کریں" },
+                loading: { en: "Fetching live rates...", ur: "براہ راست نرخ حاصل کیے جا رہے ہیں..." },
+                refresh: { en: "Refresh Rates", ur: "نرخ تازہ کریں" },
+                highestPrice: { en: "Highest Price", ur: "سب سے زیادہ قیمت" },
+                lowestPrice: { en: "Lowest Price", ur: "سب سے کم قیمت" },
+                avgPrice: { en: "Average Price", ur: "اوسط قیمت" },
+            },
+            knowledgeHub: {
+                heading: { en: "Knowledge Hub", ur: "علم کا مرکز" },
+                subheading: { en: "Learn modern farming techniques and stay updated with agricultural trends", ur: "جدید کاشتکاری کی تکنیکیں سیکھیں اور زرعی رجحانات سے آگاہ رہیں" },
+                tabTrending: { en: "Trending News", ur: "رجحان میں خبریں" },
+                tabCropInsights: { en: "Crop Insights", ur: "فصل کی معلومات" },
+                tabMandiAnalysis: { en: "Mandi Analysis", ur: "منڈی کا تجزیہ" },
+                tabTechniques: { en: "Modern Techniques", ur: "جدید تکنیکیں" },
+                tabInnovations: { en: "Innovations", ur: "نئی تکنیکیں" },
+                search: { en: "Search knowledge...", ur: "علم میں تلاش کریں..." },
+                readMore: { en: "Read More", ur: "مزید پڑھیں" },
+                readTime: { en: "min read", ur: "منٹ کا مطالعہ" },
+                noResults: { en: "No articles found", ur: "کوئی مضمون نہیں ملا" },
+                featured: { en: "Featured", ur: "خصوصی" },
+                loading: { en: "Loading knowledge hub...", ur: "علم کا مرکز لوڈ ہو رہا ہے..." },
+            },
+            weather: {
+                heading: { en: "Weather Guidance", ur: "موسم کی رہنمائی" },
+                subheading: { en: "Get hyper-local weather forecasts specific to your farm location", ur: "اپنے فارم کے لیے مقامی موسم کی پیشن گوئی حاصل کریں" },
+                currentWeather: { en: "Current Weather", ur: "موجودہ موسم" },
+                forecast: { en: "7-Day Forecast", ur: "7 دن کی پیشن گوئی" },
+                alerts: { en: "Weather Alerts", ur: "موسم کی انتباہات" },
+                recommendations: { en: "Recommendations", ur: "سفارشات" },
+                diseaseRisk: { en: "Disease Risk", ur: "بیماری کا خطرہ" },
+                soilMoisture: { en: "Soil Moisture & Irrigation", ur: "مٹی کی نمی اور آبپاشی" },
+                temperature: { en: "Temperature", ur: "درجہ حرارت" },
+                humidity: { en: "Humidity", ur: "نمی" },
+                windSpeed: { en: "Wind Speed", ur: "ہوا کی رفتار" },
+                rainfall: { en: "Rainfall", ur: "بارش" },
+                loading: { en: "Loading weather data...", ur: "موسم کا ڈیٹا لوڈ ہو رہا ہے..." },
+                updated: { en: "Last updated", ur: "آخری اپڈیٹ" },
+                noData: { en: "No district selected. Please update your profile with your farm location.", ur: "کوئی ضلع منتخب نہیں۔ براہ کرم اپنا فارم مقام اپڈیٹ کریں۔" },
+                frostWarning: { en: "Frost Warning", ur: "سردی کی انتباہ" },
+                rainAlert: { en: "Heavy Rain Alert", ur: "بھاری بارش کی انتباہ" },
+                windAlert: { en: "High Wind Alert", ur: "تیز ہوا کی انتباہ" },
+                irrigate: { en: "Recommend: Irrigate today", ur: "تجویز: آج آبپاشی کریں" },
+                skipIrrigation: { en: "Skip irrigation - rain coming", ur: "آبپاشی چھوڑیں - بارش آنے والی ہے" },
+                avoidSpray: { en: "Avoid pesticide spray - high wind", ur: "کیڑے کا دوا نہ ڈالیں - تیز ہوا" },
+                goodForSpray: { en: "Good window to spray pesticides", ur: "کیڑے کا دوا ڈالنے کا بہترین وقت" },
+            },
+            profile: {
+                heading: { en: "Settings", ur: "ترتیبات" },
+                name: { en: "Farmer Name", ur: "کسان کا نام" },
+                loc: { en: "District", ur: "ضلع" },
+                plan: { en: "Active Plan", ur: "فعال پلان" },
+                valid: { en: "Expires Dec 2025", ur: "میعاد دسمبر 2025" },
+                upgrade: { en: "Upgrade Now", ur: "ابھی اپ گریڈ کریں" },
+                save: { en: "Save Profile", ur: "محفوظ کریں" },
+            },
+            footer: {
+                slogan: { en: "Farming for the Future.", ur: "مستقبل کی کاشتکاری۔" },
+                aboutDesc: { en: "Pakistan's #1 Agri-Tech Platform.", ur: "پاکستان کا نمبر 1 زرعی ٹیکنالوجی پلیٹ فارم۔" },
+            }
+        };
+
+        // --- 2. MASTER APP STATE ---
+        const state = {
+            currentPage: 'home',
+            lang: 'en',
+            scanState: 'idle', 
+            scanProgress: 0,
+            scanMode: 'both',
+            selectedImage: null,
+            scanResultData: null,
+            signupStep: 1,
+            showContactPanel: false,
+            showAccountSettings: false,
+            accountSettingsTab: 'personal',
+            mandiRatesMode: '1crop-nmandi',
+            selectedCrops: [],
+            selectedMandis: [],
+            mandiRatesData: {},
+            isLoadingRates: false,
+            lastFetchTime: null,
+            knowledgeHubTab: 'trending',
+            knowledgeSearchQuery: '',
+            isLoadingKnowledge: false,
+            currentArticleId: null,
+            knowledgeContentViewMode: 'grid',
+            userDistrict: 'Bahawalpur',
+            currentWeather: null,
+            weatherForecast: [],
+            weatherAlerts: [],
+            diseaseRisks: {},
+            isLoadingWeather: false,
+            weatherLastRefresh: null
+        };
+
+        // --- Demo Data ---
+        const demos = [
+            {
+                id: 1,
+                nameKey: 'demo1',
+                img: "https://images.unsplash.com/photo-1628189873142-b88308638b93?q=80&w=600&auto=format&fit=crop",
+                result: {
+                    disease: { en: "No major disease detected.", ur: "کوئی بڑی بیماری نہیں ملی۔" },
+                    pest: { en: "Whitefly Infestation (Severe)", ur: "سفید مکھی کا شدید حملہ" },
+                    cure: { en: "Spray Imidacloprid 200SL. Install yellow sticky traps.", ur: "امیڈاکلوپرڈ 200SL کا سپرے کریں۔ پیلے سٹکی ٹریپس لگائیں۔" }
+                }
+            },
+            {
+                id: 2,
+                nameKey: 'demo2',
+                img: "https://images.unsplash.com/photo-1574943320219-55edeb70ad5d?q=80&w=600&auto=format&fit=crop",
+                result: {
+                    disease: { en: "Yellow Rust (Early Stage)", ur: "زرد کنگی (ابتدائی مرحلہ)" },
+                    pest: { en: "No pests detected.", ur: "کوئی کیڑا نہیں ملا۔" },
+                    cure: { en: "Apply Fungicide (Propiconazole). Reduce irrigation.", ur: "پھپھوندی کش دوا (پروپیکونازول) استعمال کریں۔ پانی کم لگائیں۔" }
+                }
+            },
+            {
+                id: 3,
+                nameKey: 'demo3',
+                img: "https://images.unsplash.com/photo-1592878904946-b3cd8ae243d9?q=80&w=600&auto=format&fit=crop",
+                result: {
+                    disease: { en: "Early Blight", ur: "ارلی بلائٹ (جھلساؤ)" },
+                    pest: { en: "Fruit Borer Larvae", ur: "پھل کی سنڈی" },
+                    cure: { en: "Spray Mancozeb for blight + Emamectin for borer.", ur: "بلائٹ کے لیے مینکوزیب اور سنڈی کے لیے ایما میمیکٹن کا سپرے کریں۔" }
+                }
+            }
+        ];
+
+        // --- Crop & Mandi Data ---
+        const crops = [
+            { id: 'wheat', name_en: 'Wheat', name_ur: 'گندم', icon: 'wheat' },
+            { id: 'cotton', name_en: 'Cotton', name_ur: 'کپاس', icon: 'layers' },
+            { id: 'rice', name_en: 'Rice', name_ur: 'چاول', icon: 'droplets' },
+            { id: 'sugarcane', name_en: 'Sugarcane', name_ur: 'گنا', icon: 'leaf' },
+            { id: 'maize', name_en: 'Maize', name_ur: 'مکئی', icon: 'square' },
+            { id: 'vegetables', name_en: 'Vegetables', name_ur: 'سبزیاں', icon: 'carrot' }
+        ];
+
+        const mandis = [
+            { id: 'bahawalpur', name_en: 'Bahawalpur', name_ur: 'بہاولپور', province: 'Punjab' },
+            { id: 'multan', name_en: 'Multan', name_ur: 'ملتان', province: 'Punjab' },
+            { id: 'khanewal', name_en: 'Khanewal', name_ur: 'خانیوال', province: 'Punjab' },
+            { id: 'lahore', name_en: 'Lahore', name_ur: 'لاہور', province: 'Punjab' },
+            { id: 'karachi', name_en: 'Karachi', name_ur: 'کراچی', province: 'Sindh' },
+            { id: 'hyderabad', name_en: 'Hyderabad', name_ur: 'حیدرآباد', province: 'Sindh' },
+            { id: 'faisalabad', name_en: 'Faisalabad', name_ur: 'فیصل آباد', province: 'Punjab' },
+            { id: 'rawalpindi', name_en: 'Rawalpindi', name_ur: 'راولپنڈی', province: 'Punjab' }
+        ];
+
+        // Mock live mandi rates data
+        const mockMandiRates = {
+            'wheat-bahawalpur': { rate: 2850, trend: '+2.3%', high: 2900, low: 2750, unit: 'per 40kg' },
+            'wheat-multan': { rate: 2820, trend: '+1.8%', high: 2880, low: 2720, unit: 'per 40kg' },
+            'wheat-khanewal': { rate: 2880, trend: '+3.1%', high: 2920, low: 2800, unit: 'per 40kg' },
+            'wheat-lahore': { rate: 2900, trend: '+2.5%', high: 2950, low: 2850, unit: 'per 40kg' },
+            'cotton-bahawalpur': { rate: 8200, trend: '+1.2%', high: 8350, low: 8000, unit: 'per 40kg' },
+            'cotton-multan': { rate: 8100, trend: '+0.9%', high: 8250, low: 7950, unit: 'per 40kg' },
+            'rice-lahore': { rate: 4200, trend: '+2.8%', high: 4300, low: 4050, unit: 'per 40kg' },
+            'sugarcane-bahawalpur': { rate: 450, trend: '+1.5%', high: 480, low: 420, unit: 'per kg' }
+        };
+
+        // --- Weather Data by District ---
+        const weatherDataByDistrict = {
+            'Bahawalpur': {
+                coords: { lat: 29.1897, lon: 71.6447 },
+                current: {
+                    temp: 24,
+                    minTemp: 16,
+                    maxTemp: 28,
+                    humidity: 65,
+                    windSpeed: 12,
+                    windDirection: 'NW',
+                    rainfall: 0,
+                    condition: 'clear',
+                    icon: 'sun',
+                    uvIndex: 5,
+                    feelsLike: 22,
+                    visibility: 8,
+                    pressure: 1012
+                },
+                forecast: [
+                    { date: '2024-12-20', maxTemp: 28, minTemp: 16, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 12, humidity: 60 },
+                    { date: '2024-12-21', maxTemp: 26, minTemp: 14, rainfall: 5, condition: 'rainy', icon: 'cloud-rain', windSpeed: 8, humidity: 75 },
+                    { date: '2024-12-22', maxTemp: 18, minTemp: 8, rainfall: 0, condition: 'cloudy', icon: 'cloud', windSpeed: 15, humidity: 70 },
+                    { date: '2024-12-23', maxTemp: 20, minTemp: 6, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 10, humidity: 55 },
+                    { date: '2024-12-24', maxTemp: 25, minTemp: 12, rainfall: 2, condition: 'rainy', icon: 'cloud-rain', windSpeed: 9, humidity: 68 },
+                    { date: '2024-12-25', maxTemp: 27, minTemp: 15, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 11, humidity: 62 },
+                    { date: '2024-12-26', maxTemp: 28, minTemp: 16, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 13, humidity: 58 }
+                ],
+                alerts: [
+                    { type: 'frost', severity: 'medium', message: { en: 'Frost warning Dec 22 early morning', ur: 'دسمبر 22 کو صبح سردی کی انتباہ' }, minTemp: -2, time: '2-6 AM' }
+                ],
+                diseaseRisks: {
+                    'wheat': { rust: 65, powderyMildew: 25, rootRot: 35 },
+                    'cotton': { whitefly: 45, leafCurl: 20, boll: 15 }
+                }
+            },
+            'Multan': {
+                coords: { lat: 30.1937, lon: 71.4340 },
+                current: {
+                    temp: 25,
+                    minTemp: 17,
+                    maxTemp: 29,
+                    humidity: 60,
+                    windSpeed: 10,
+                    windDirection: 'N',
+                    rainfall: 0,
+                    condition: 'sunny',
+                    icon: 'sun',
+                    uvIndex: 6,
+                    feelsLike: 23,
+                    visibility: 9,
+                    pressure: 1010
+                },
+                forecast: [
+                    { date: '2024-12-20', maxTemp: 29, minTemp: 17, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 10, humidity: 55 },
+                    { date: '2024-12-21', maxTemp: 27, minTemp: 15, rainfall: 3, condition: 'rainy', icon: 'cloud-rain', windSpeed: 9, humidity: 70 },
+                    { date: '2024-12-22', maxTemp: 22, minTemp: 10, rainfall: 0, condition: 'cloudy', icon: 'cloud', windSpeed: 12, humidity: 65 },
+                    { date: '2024-12-23', maxTemp: 24, minTemp: 8, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 11, humidity: 60 },
+                    { date: '2024-12-24', maxTemp: 28, minTemp: 14, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 8, humidity: 62 },
+                    { date: '2024-12-25', maxTemp: 30, minTemp: 16, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 10, humidity: 55 },
+                    { date: '2024-12-26', maxTemp: 31, minTemp: 17, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 12, humidity: 50 }
+                ],
+                alerts: [],
+                diseaseRisks: {
+                    'wheat': { rust: 45, powderyMildew: 20, rootRot: 25 },
+                    'cotton': { whitefly: 55, leafCurl: 30, boll: 20 }
+                }
+            },
+            'Lahore': {
+                coords: { lat: 31.5204, lon: 74.3587 },
+                current: {
+                    temp: 22,
+                    minTemp: 14,
+                    maxTemp: 26,
+                    humidity: 72,
+                    windSpeed: 15,
+                    windDirection: 'E',
+                    rainfall: 2,
+                    condition: 'rainy',
+                    icon: 'cloud-rain',
+                    uvIndex: 3,
+                    feelsLike: 20,
+                    visibility: 6,
+                    pressure: 1008
+                },
+                forecast: [
+                    { date: '2024-12-20', maxTemp: 26, minTemp: 14, rainfall: 2, condition: 'rainy', icon: 'cloud-rain', windSpeed: 15, humidity: 75 },
+                    { date: '2024-12-21', maxTemp: 24, minTemp: 12, rainfall: 8, condition: 'rainy', icon: 'cloud-rain', windSpeed: 12, humidity: 80 },
+                    { date: '2024-12-22', maxTemp: 18, minTemp: 8, rainfall: 0, condition: 'cloudy', icon: 'cloud', windSpeed: 18, humidity: 72 },
+                    { date: '2024-12-23', maxTemp: 20, minTemp: 6, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 14, humidity: 65 },
+                    { date: '2024-12-24', maxTemp: 23, minTemp: 10, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 11, humidity: 68 },
+                    { date: '2024-12-25', maxTemp: 25, minTemp: 12, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 10, humidity: 62 },
+                    { date: '2024-12-26', maxTemp: 27, minTemp: 14, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 12, humidity: 58 }
+                ],
+                alerts: [
+                    { type: 'rain', severity: 'high', message: { en: 'Heavy rain expected Dec 21', ur: 'دسمبر 21 کو بھاری بارش متوقع ہے' }, rainfall: 8 }
+                ],
+                diseaseRisks: {
+                    'wheat': { rust: 75, powderyMildew: 35, rootRot: 55 },
+                    'cotton': { whitefly: 35, leafCurl: 25, boll: 18 }
+                }
+            },
+            'Karachi': {
+                coords: { lat: 24.8607, lon: 67.0011 },
+                current: {
+                    temp: 28,
+                    minTemp: 22,
+                    maxTemp: 31,
+                    humidity: 55,
+                    windSpeed: 18,
+                    windDirection: 'SW',
+                    rainfall: 0,
+                    condition: 'sunny',
+                    icon: 'sun',
+                    uvIndex: 8,
+                    feelsLike: 27,
+                    visibility: 10,
+                    pressure: 1013
+                },
+                forecast: [
+                    { date: '2024-12-20', maxTemp: 31, minTemp: 22, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 18, humidity: 52 },
+                    { date: '2024-12-21', maxTemp: 30, minTemp: 21, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 20, humidity: 55 },
+                    { date: '2024-12-22', maxTemp: 29, minTemp: 20, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 22, humidity: 58 },
+                    { date: '2024-12-23', maxTemp: 28, minTemp: 19, rainfall: 0, condition: 'clear', icon: 'sun', windSpeed: 19, humidity: 60 },
+                    { date: '2024-12-24', maxTemp: 30, minTemp: 21, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 17, humidity: 54 },
+                    { date: '2024-12-25', maxTemp: 31, minTemp: 22, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 16, humidity: 51 },
+                    { date: '2024-12-26', maxTemp: 32, minTemp: 23, rainfall: 0, condition: 'sunny', icon: 'sun', windSpeed: 18, humidity: 50 }
+                ],
+                alerts: [],
+                diseaseRisks: {
+                    'vegetables': { leafSpot: 40, powderyMildew: 20, bacterial: 15 },
+                    'cotton': { whitefly: 65, leafCurl: 40, boll: 25 }
+                }
+            }
+        };
+
+        // --- Knowledge Hub Content Data ---
+        const knowledgeContent = [
+            // TRENDING NEWS
+            { id: 'trend-1', category: 'trending', title: { en: 'Wheat Prices Rise 5% This Week', ur: 'اس ہفتے گندم کی قیمت 5% بڑھ گئی' }, description: { en: 'Global supply shortage drives up prices', ur: 'عالمی رفتار کمی سے قیمتیں بڑھیں' }, fullContent: { en: 'Wheat prices have surged 5% this week due to reduced global supply and increased demand from India and Middle East markets. Farmers in Punjab should consider selling now at favorable rates.', ur: 'عالمی رفتار میں کمی اور ہندوستان کی بڑھتی طلب سے گندم کی قیمتوں میں 5% اضافہ ہوا ہے۔ پنجاب کے کسانوں کو اب موجودہ سود مند شرح پر بیچنے پر غور کرنا چاہیے۔' }, featured: true, date: new Date(Date.now() - 1*24*60*60*1000), readTime: 3, crops: ['wheat'] },
+            { id: 'trend-2', category: 'trending', title: { en: 'Cotton Crop Threatened by Early Frost', ur: 'کپاس کی فصل کو جلدی سردی سے خطرہ' }, description: { en: 'Weather alert for December plantings', ur: 'دسمبر کی فصل کے لیے موسم انتباہ' }, fullContent: { en: 'Meteorological department warns of early frost in cotton-growing regions of Sindh and Southern Punjab. Farmers should prepare protective measures and avoid late irrigation.', ur: 'موسمیاتی محکمہ سندھ اور جنوبی پنجاب میں کپاس کی فصل والے علاقوں میں جلدی سردی کی انتباہ دیتا ہے۔' }, featured: true, date: new Date(Date.now() - 2*24*60*60*1000), readTime: 2, crops: ['cotton'] },
+            { id: 'trend-3', category: 'trending', title: { en: 'New Rice Variety Shows 20% Higher Yield', ur: 'نئی چاول کی قسم 20% زیادہ پیداوار دیتی ہے' }, description: { en: 'PARC releases drought-resistant rice seed', ur: 'PARC سوکھے سے مزاحم چاول کا بیج جاری کرتا ہے' }, fullContent: { en: 'Pakistan Agriculture Research Council has released a new rice variety that requires 30% less water and produces 20% higher yield. Available at government seed centers.', ur: 'پاکستان کے زرعی تحقیق کونسل نے ایک نئی قسم جاری کی ہے جو 30% کم پانی چاہتی ہے اور 20% زیادہ پیداوار دیتی ہے۔' }, featured: true, date: new Date(Date.now() - 3*24*60*60*1000), readTime: 4, crops: ['rice'] },
+
+            // CROP INSIGHTS
+            { id: 'crop-1', category: 'crop-insights', title: { en: 'Wheat Growth Stages Explained', ur: 'گندم کی بڑھتی کے مراحل' }, description: { en: 'Complete guide from sowing to harvesting', ur: 'بوائی سے کاٹنے تک مکمل رہنمائی' }, fullContent: { en: 'Wheat has 6 major growth stages: germination, seedling, tillering, stem elongation, heading, and grain filling. Each stage requires specific irrigation and fertilizer timing for maximum yield.', ur: 'گندم کے 6 بڑے بڑھنے کے مراحل ہیں۔ ہر مرحلہ کو خاص پانی اور کھاد کی ضرورت ہے۔' }, featured: false, date: new Date(Date.now() - 5*24*60*60*1000), readTime: 6, crops: ['wheat'] },
+            { id: 'crop-2', category: 'crop-insights', title: { en: 'Cotton Pest Management', ur: 'کپاس کی کیڑوں کی حفاظت' }, description: { en: 'Identify and control major cotton pests', ur: 'بڑے کپاس کیڑوں کی نشاندہی اور کنٹرول' }, fullContent: { en: 'Major cotton pests include whitefly, boll weevil, and thrips. Integrated pest management using pheromone traps and beneficial insects is most effective. Pesticide use should be minimal.', ur: 'بڑے کپاس کیڑوں میں سفید مکھی، بولل ویویل اور تھریپس شامل ہیں۔ Pheromone traps استعمال کرنا سب سے مؤثر ہے۔' }, featured: false, date: new Date(Date.now() - 7*24*60*60*1000), readTime: 5, crops: ['cotton'] },
+            { id: 'crop-3', category: 'crop-insights', title: { en: 'Rice Nutrition Requirements', ur: 'چاول کی غذائی ضروریات' }, description: { en: 'Optimal fertilizer schedule for rice crops', ur: 'چاول کے لیے بہترین کھاد کا شیڈول' }, fullContent: { en: 'Rice requires nitrogen at three stages: tillering, panicle initiation, and grain filling. Phosphorus and potassium should be applied at sowing. Micronutrients like zinc are critical for yield.', ur: 'چاول کو نائٹروجن کی ضرورت ہے تین مراحل میں۔ فاسفورس اور پوٹاشیم بوائی پر دیں۔' }, featured: false, date: new Date(Date.now() - 8*24*60*60*1000), readTime: 4, crops: ['rice'] },
+
+            // MANDI ANALYSIS
+            { id: 'mandi-1', category: 'mandi-analysis', title: { en: 'Why Tomato Prices Crashed This Week', ur: 'اس ہفتے ٹماٹر کی قیمت کیوں گری' }, description: { en: 'Market analysis of vegetable price trends', ur: 'سبزیوں کی قیمت کے رجحان کا تجزیہ' }, fullContent: { en: 'Tomato prices dropped 40% due to over-supply from Sindh region. This is temporary. Recommended to sell this week at existing rates rather than holding stock which will further depreciate.', ur: 'سندھ سے زیادہ رفتار کی وجہ سے ٹماٹر کی قیمت 40% گری۔ یہ عارضی ہے۔ موجودہ نرخ پر بیچنے کی سفارش ہے۔' }, featured: true, date: new Date(Date.now() - 1*24*60*60*1000), readTime: 3, crops: ['vegetables'] },
+            { id: 'mandi-2', category: 'mandi-analysis', title: { en: 'Seasonal Price Patterns for Cotton', ur: 'کپاس کے موسمی نرخ کے نمونے' }, description: { en: 'Best time to sell cotton for maximum profit', ur: 'کپاس بیچنے کا بہترین وقت' }, fullContent: { en: 'Cotton prices typically peak in January-February after harvest season. November-December are buying months when prices are lower. Plan your sale accordingly for 15-20% higher returns.', ur: 'کپاس کی قیمت عام طور پر جنوری-فروری میں سب سے زیادہ ہوتی ہے۔ نومبر-دسمبر میں خریدنے کے مہینے ہیں۔' }, featured: false, date: new Date(Date.now() - 6*24*60*60*1000), readTime: 4, crops: ['cotton'] },
+
+            // MODERN TECHNIQUES
+            { id: 'tech-1', category: 'techniques', title: { en: 'Drip Irrigation System Setup', ur: 'ڈرپ آبپاشی کا نظام لگانا' }, description: { en: 'Step-by-step guide to installing drip irrigation', ur: 'ڈرپ آبپاشی لگانے کی تفصیلی رہنمائی' }, fullContent: { en: 'Drip irrigation saves 40-60% water compared to flood irrigation. Steps: 1) Layout main line, 2) Install lateral pipes, 3) Place drippers, 4) Install filter and timer. Cost recovers in 2-3 years through water savings and increased yield.', ur: 'ڈرپ آبپاشی سے 40-60% پانی بچتا ہے۔ یہ نظام لگانا آسان ہے اور 2-3 سالوں میں لاگت واپس آ جاتی ہے۔' }, featured: true, date: new Date(Date.now() - 4*24*60*60*1000), readTime: 7, crops: ['wheat', 'cotton', 'vegetables'] },
+            { id: 'tech-2', category: 'techniques', title: { en: 'Organic Farming Basics', ur: 'نامیاتی کاشتکاری کی بنیادیں' }, description: { en: 'Start organic farming with minimal investment', ur: 'کم سرمایہ کے ساتھ نامیاتی کاشتکاری شروع کریں' }, fullContent: { en: 'Organic farming uses natural compost, biofertilizers, and crop rotation. Benefits: higher market price (20-30% premium), better soil health, and healthier crops. Certification takes 2-3 years but worth the investment.', ur: 'نامیاتی کاشتکاری قدرتی کھاد اور فصل کی تبدیلی استعمال کرتی ہے۔ بہتر قیمت اور مٹی کی صحت ملتی ہے۔' }, featured: false, date: new Date(Date.now() - 9*24*60*60*1000), readTime: 8, crops: ['wheat', 'rice', 'vegetables'] },
+            { id: 'tech-3', category: 'techniques', title: { en: 'Mulching for Soil Conservation', ur: 'مٹی کی حفاظت کے لیے ملچنگ' }, description: { en: 'How mulching improves soil and reduces water loss', ur: 'ملچنگ مٹی کو بہتر بناتی ہے اور پانی بچاتی ہے' }, fullContent: { en: 'Mulching (covering soil with organic material) reduces water evaporation by 50%, improves soil temperature, and adds nutrients. Use crop residue, hay, or leaves. Free or low-cost material available on most farms.', ur: 'ملچنگ سے پانی کا بخارات 50% کم ہوتا ہے۔ مٹی کی بہتری ہوتی ہے اور یہ مفت یا سستا ہے۔' }, featured: false, date: new Date(Date.now() - 10*24*60*60*1000), readTime: 5, crops: ['wheat', 'cotton', 'vegetables'] },
+
+            // INNOVATIONS
+            { id: 'innov-1', category: 'innovations', title: { en: 'AI-Powered Farm Monitoring Drones', ur: 'AI سے چلنے والے فارم مانیٹرنگ ڈرونز' }, description: { en: 'New drone technology for crop health monitoring', ur: 'فصل کی صحت دیکھنے کے لیے نئی ڈرون ٹیکنالوجی' }, fullContent: { en: 'Modern drones equipped with AI can map farm health, detect diseases early, and estimate yield 2-3 weeks before harvest. Initial cost is high but subscription models are now available. Reduces crop loss by 15-25%.', ur: 'AI سے چلنے والے ڈرونز فصل کی صحت کی نقشہ بنا سکتے ہیں۔ بیماریوں کی جلدی پہچان کرتے ہیں۔ فصل کا نقصان 15-25% کم ہوتا ہے۔' }, featured: true, date: new Date(Date.now() - 2*24*60*60*1000), readTime: 6, crops: ['wheat', 'cotton', 'rice'] },
+            { id: 'innov-2', category: 'innovations', title: { en: 'Precision Agriculture Sensors', ur: 'درست کاشتکاری کے سنسرز' }, description: { en: 'Soil moisture sensors reduce water waste', ur: 'مٹی کی نمی سے پانی کو ضائع ہونے سے بچاتے ہیں' }, fullContent: { en: 'IoT soil moisture sensors send real-time data to farmers\' phones. Irrigation is automated based on actual soil moisture, not guesswork. Reduces water use by 30-40% and increases yield by 10-15%. Affordable options now available at Rs. 2000-5000 per hectare.', ur: 'IoT سنسرز کسانوں کو حقیقی وقت میں معلومات دیتے ہیں۔ آبپاشی خودکار ہو جاتی ہے۔ پانی 30-40% کم خرچ ہوتا ہے۔' }, featured: true, date: new Date(Date.now() - 4*24*60*60*1000), readTime: 5, crops: ['wheat', 'rice', 'vegetables'] },
+            { id: 'innov-3', category: 'innovations', title: { en: 'Hybrid Seed Varieties 2024', ur: '2024 میں ہائبرڈ بیجوں کی اقسام' }, description: { en: 'Latest crop varieties with disease resistance', ur: 'نئی اقسام جو بیماریوں سے محفوظ ہیں' }, fullContent: { en: 'New hybrid varieties of wheat and rice released in 2024 have 30-40% higher yield, disease resistance, and water efficiency. Government seed centers offer certified seeds at subsidized rates. Expected to revolutionize Pakistani agriculture.', ur: '2024 میں نئی ہائبرڈ اقسام 30-40% زیادہ پیداوار دیتی ہیں۔ بیماریوں سے محفوظ ہیں۔ حکومتی مرکز سے کم قیمت پر ملتے ہیں۔' }, featured: false, date: new Date(Date.now() - 5*24*60*60*1000), readTime: 4, crops: ['wheat', 'rice', 'maize'] },
+        ];
+
+        // --- Logic & Rendering ---
+
+        function setPage(pageId) {
+            state.currentPage = pageId;
+            window.scrollTo(0, 0);
+            renderApp();
+        }
+
+        function setLang(newLang) {
+            state.lang = newLang;
+            const body = document.body;
+            body.style.fontFamily = newLang === 'ur' ? "'Noto Nastaliq Urdu', serif" : "'Plus Jakarta Sans', sans-serif";
+            body.style.direction = newLang === 'ur' ? 'rtl' : 'ltr';
+            renderApp();
+        }
+
+        function setScanMode(mode) {
+            state.scanMode = mode;
+            renderApp();
+        }
+
+        function handleScan(imgUrl, demoId) {
+            state.selectedImage = imgUrl;
+            
+            // Set result data based on demo ID or default
+            if(demoId) {
+                const demo = demos.find(d => d.id === demoId);
+                state.scanResultData = demo ? demo.result : demos[2].result;
+            } else {
+                state.scanResultData = demos[2].result; // Default fallback
+            }
+
+            state.scanState = 'scanning';
+            state.scanProgress = 0;
+            renderApp();
+            
+            // Progress Animation
+            const interval = setInterval(() => {
+                if (state.scanProgress >= 100) {
+                    clearInterval(interval);
+                    state.scanState = 'result';
+                    renderApp();
+                } else {
+                    state.scanProgress += 2;
+                    const progressBar = document.getElementById('scan-progress-bar');
+                    const progressText = document.getElementById('scan-progress-text');
+                    if (progressBar) progressBar.style.width = `${state.scanProgress}%`;
+                    if (progressText) progressText.innerText = `${state.scanProgress}%`;
+                }
+            }, 40);
+        }
+
+        function resetScan() {
+            state.scanState = 'idle';
+            state.selectedImage = null;
+            state.scanResultData = null;
+            renderApp();
+        }
+
+        function setSignupStep(step) {
+            state.signupStep = step;
+            renderApp();
+        }
+
+        function toggleContactPanel() {
+            state.showContactPanel = !state.showContactPanel;
+            renderApp();
+        }
+
+        function toggleAccountSettings() {
+            state.showAccountSettings = !state.showAccountSettings;
+            state.accountSettingsTab = 'personal';
+            renderApp();
+        }
+
+        function setAccountTab(tab) {
+            state.accountSettingsTab = tab;
+            renderApp();
+        }
+
+        function setMandiRatesMode(mode) {
+            state.mandiRatesMode = mode;
+            state.selectedCrops = [];
+            state.selectedMandis = [];
+            renderApp();
+        }
+
+        function toggleCropSelection(cropId) {
+            if (state.mandiRatesMode === '1crop-nmandi' || state.mandiRatesMode === 'ncrops-1mandi') {
+                state.selectedCrops = state.selectedCrops.includes(cropId) ? [] : [cropId];
+            } else {
+                if (state.selectedCrops.includes(cropId)) {
+                    state.selectedCrops = state.selectedCrops.filter(c => c !== cropId);
+                } else {
+                    state.selectedCrops.push(cropId);
+                }
+            }
+            fetchMandiRates();
+            renderApp();
+        }
+
+        function toggleMandiSelection(mandiId) {
+            if (state.mandiRatesMode === 'ncrops-1mandi') {
+                state.selectedMandis = state.selectedMandis.includes(mandiId) ? [] : [mandiId];
+            } else {
+                if (state.selectedMandis.includes(mandiId)) {
+                    state.selectedMandis = state.selectedMandis.filter(m => m !== mandiId);
+                } else {
+                    state.selectedMandis.push(mandiId);
+                }
+            }
+            fetchMandiRates();
+            renderApp();
+        }
+
+        function fetchMandiRates() {
+            if (state.selectedCrops.length === 0 || state.selectedMandis.length === 0) {
+                state.mandiRatesData = {};
+                return;
+            }
+            
+            state.isLoadingRates = true;
+            renderApp();
+
+            setTimeout(() => {
+                state.mandiRatesData = {};
+                for (const cropId of state.selectedCrops) {
+                    state.mandiRatesData[cropId] = {};
+                    for (const mandiId of state.selectedMandis) {
+                        const key = `${cropId}-${mandiId}`;
+                        state.mandiRatesData[cropId][mandiId] = mockMandiRates[key] || {
+                            rate: Math.floor(Math.random() * 5000) + 1000,
+                            trend: (Math.random() > 0.5 ? '+' : '') + (Math.random() * 5).toFixed(1) + '%',
+                            high: 0,
+                            low: 0,
+                            unit: 'per 40kg'
+                        };
+                    }
+                }
+                state.isLoadingRates = false;
+                state.lastFetchTime = new Date();
+                renderApp();
+            }, 800);
+        }
+
+        function setKnowledgeHubTab(tabId) {
+            state.knowledgeHubTab = tabId;
+            state.knowledgeSearchQuery = '';
+            state.currentArticleId = null;
+            renderApp();
+        }
+
+        function setKnowledgeSearchQuery(query) {
+            state.knowledgeSearchQuery = query.toLowerCase();
+            renderApp();
+        }
+
+        function getFilteredKnowledgeContent() {
+            let filtered = knowledgeContent.filter(article => article.category === state.knowledgeHubTab);
+            
+            if (state.knowledgeSearchQuery.trim() !== '') {
+                filtered = filtered.filter(article => 
+                    article.title[state.lang].toLowerCase().includes(state.knowledgeSearchQuery) ||
+                    article.description[state.lang].toLowerCase().includes(state.knowledgeSearchQuery)
+                );
+            }
+            
+            return filtered.sort((a, b) => {
+                if (a.featured && !b.featured) return -1;
+                if (!a.featured && b.featured) return 1;
+                return new Date(b.date) - new Date(a.date);
+            });
+        }
+
+        function openKnowledgeArticle(articleId) {
+            state.currentArticleId = articleId;
+            renderApp();
+        }
+
+        function closeKnowledgeArticle() {
+            state.currentArticleId = null;
+            renderApp();
+        }
+
+        function loadWeatherForDistrict(district) {
+            state.userDistrict = district;
+            state.isLoadingWeather = true;
+            renderApp();
+
+            setTimeout(() => {
+                const weatherData = weatherDataByDistrict[district];
+                if (weatherData) {
+                    state.currentWeather = weatherData.current;
+                    state.weatherForecast = weatherData.forecast;
+                    state.weatherAlerts = weatherData.alerts;
+                    state.diseaseRisks = weatherData.diseaseRisks;
+                }
+                state.isLoadingWeather = false;
+                state.weatherLastRefresh = new Date();
+                renderApp();
+            }, 800);
+        }
+
+        function getWeatherRecommendation() {
+            if (!state.currentWeather || !state.weatherForecast.length) return null;
+            
+            const today = state.weatherForecast[0];
+            const tomorrow = state.weatherForecast[1];
+            
+            let recommendations = [];
+            
+            // Irrigation recommendation
+            if (today.rainfall === 0 && today.humidity < 70) {
+                recommendations.push({
+                    type: 'irrigation',
+                    text: t.weather.irrigate[state.lang],
+                    icon: 'droplet',
+                    color: 'emerald'
+                });
+            } else if (tomorrow.rainfall > 3) {
+                recommendations.push({
+                    type: 'skip-irrigation',
+                    text: t.weather.skipIrrigation[state.lang],
+                    icon: 'cloud-rain',
+                    color: 'blue'
+                });
+            }
+            
+            // Spray recommendation
+            if (state.currentWeather.windSpeed > 15) {
+                recommendations.push({
+                    type: 'avoid-spray',
+                    text: t.weather.avoidSpray[state.lang],
+                    icon: 'wind',
+                    color: 'red'
+                });
+            } else if (state.currentWeather.humidity > 65 && state.currentWeather.windSpeed < 12) {
+                recommendations.push({
+                    type: 'good-spray',
+                    text: t.weather.goodForSpray[state.lang],
+                    icon: 'droplets',
+                    color: 'green'
+                });
+            }
+            
+            return recommendations;
+        }
+
+        // --- Components ---
+
+        const Navbar = () => {
+            const navItems = [
+                { id: 'home', label: t.nav.home[state.lang] },
+                { id: 'demo', label: state.lang === 'en' ? 'Demo' : 'ڈیمو' },
+                { id: 'scan', label: t.nav.scan[state.lang] },
+                { id: 'weather', label: state.lang === 'en' ? 'Weather' : 'موسم' },
+                { id: 'knowledge-hub', label: state.lang === 'en' ? 'Knowledge Hub' : 'علم کا مرکز' },
+                { id: 'mandi-rates', label: state.lang === 'en' ? 'Mandi Rates' : 'منڈی کے نرخ' },
+                { id: 'dashboard', label: t.nav.dashboard[state.lang] },
+                { id: 'pricing', label: t.nav.pricing[state.lang] },
+                { id: 'contact', label: t.nav.contact[state.lang] },
+            ];
+
+            return `
+            <nav class="glass-nav fixed w-full z-50 transition-all duration-300">
+                <div class="container mx-auto px-6 h-20 flex items-center justify-between">
+                    <div class="flex items-center gap-3 cursor-pointer min-w-fit" onclick="setPage('home')">
+                        <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <i data-lucide="leaf" class="text-white w-6 h-6"></i>
+                        </div>
+                        <div class="hidden sm:block">
+                            <span class="text-2xl font-extrabold tracking-tight text-white">Agro<span class="text-emerald-400">Verse</span></span>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex items-center gap-8">
+                        ${navItems.map(item => `
+                            <button
+                                onclick="setPage('${item.id}')"
+                                class="text-sm font-bold transition-all hover:text-emerald-400 ${
+                                    state.currentPage === item.id 
+                                    ? 'text-emerald-400' 
+                                    : 'text-gray-300'
+                                }"
+                            >
+                                ${item.label}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex items-center gap-3 min-w-fit">
+                        <button 
+                            onclick="setLang('${state.lang === 'en' ? 'ur' : 'en'}')"
+                            class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-colors text-emerald-400"
+                        >
+                            ${state.lang === 'en' ? 'اردو' : 'ENG'}
+                        </button>
+
+                        <button 
+                            onclick="setPage('signup')"
+                            class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold transition-colors shadow-lg hidden sm:block"
+                        >
+                            ${state.lang === 'en' ? 'Sign Up' : 'رجسٹر کریں'}
+                        </button>
+
+                        <button 
+                            onclick="toggleAccountSettings()"
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-xl transition-all shadow-lg border border-emerald-500/50"
+                        >
+                            <i data-lucide="user" class="w-[18px] h-[18px]"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            `;
+        };
+
+        const Hero = () => {
+            return `
+            <div class="relative min-h-screen pt-20 flex flex-col items-center overflow-x-hidden">
+                <div class="absolute inset-0 bg-[#022c22]">
+                    <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay fixed"></div>
+                    <div class="absolute inset-0 mesh-gradient z-0 fixed"></div>
+                </div>
+                
+                <div class="container mx-auto px-6 relative z-10 text-center min-h-[90vh] flex flex-col justify-center">
+                    <div class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm font-bold mb-8 backdrop-blur-md mx-auto shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                        </span>
+                        ${t.hero.badge[state.lang]}
+                    </div>
+
+                    <h1 class="text-5xl md:text-8xl font-extrabold tracking-tight text-white mb-6 leading-[1.1] drop-shadow-2xl ${state.lang === 'ur' ? 'leading-[1.6]' : ''}">
+                        ${t.hero.title1[state.lang]} <br />
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-300 to-amber-300">
+                            ${t.hero.title2[state.lang]}
+                        </span>
+                    </h1>
+                    
+                    <h2 class="text-2xl md:text-3xl text-emerald-100/90 font-bold mb-6 max-w-3xl mx-auto ${state.lang === 'ur' ? 'leading-relaxed' : ''}">
+                        ${t.hero.sub[state.lang]}
+                    </h2>
+
+                    <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed ${state.lang === 'ur' ? 'text-2xl' : ''}">
+                        ${t.hero.desc[state.lang]}
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-5">
+                        <button 
+                            onclick="setPage('scan')"
+                            class="group w-full sm:w-auto px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-extrabold transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_50px_rgba(245,158,11,0.6)] flex items-center justify-center gap-3 transform hover:-translate-y-1"
+                        >
+                            <i data-lucide="scan-line" class="w-5 h-5"></i>
+                            ${t.hero.btnStart[state.lang]}
+                        </button>
+                        <button 
+                            onclick="document.getElementById('video-section').scrollIntoView({behavior: 'smooth'})"
+                            class="group w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/20 text-white rounded-xl font-bold backdrop-blur-md transition-all flex items-center justify-center gap-3 hover:border-emerald-400/50"
+                        >
+                            <i data-lucide="play-circle" class="w-5 h-5 text-emerald-400 group-hover:text-amber-400 transition-colors"></i>
+                            ${t.hero.btnDemo[state.lang]}
+                        </button>
+                    </div>
+                </div>
+
+                <div id="video-section" class="container mx-auto px-6 relative z-10 py-24">
+                    <div class="text-center mb-12">
+                        <div class="inline-block p-3 rounded-full bg-emerald-500/10 mb-4 border border-emerald-500/20"><i data-lucide="monitor-play" class="w-6 h-6 text-emerald-400"></i></div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">${t.video.heading[state.lang]}</h2>
+                        <p class="text-gray-400 max-w-xl mx-auto">${t.video.sub[state.lang]}</p>
+                    </div>
+                    
+                    <div class="max-w-5xl mx-auto glass-panel p-2 rounded-3xl shadow-2xl relative group cursor-pointer hover:scale-[1.01] transition-transform duration-500">
+                        <div class="aspect-video bg-black/50 rounded-2xl relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1592982537447-7440770c6e43?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500" alt="Farmer using tablet">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-20 h-20 bg-amber-500/90 rounded-full flex items-center justify-center play-btn-Verse backdrop-blur-sm group-hover:scale-110 transition-transform">
+                                    <i data-lucide="play" class="w-8 h-8 text-black ml-1 fill-black"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container mx-auto px-6 relative z-10 py-12">
+                    ${Features(true)} 
+                </div>
+            </div>
+            `;
+        };
+
+        const Features = (isSnippet = false) => {
+            return `
+            <div class="${isSnippet ? '' : 'py-24 bg-[#011c15]'} relative overflow-hidden">
+                <div class="container mx-auto ${!isSnippet ? 'px-6' : ''} relative z-10">
+                    ${!isSnippet ? `
+                    <div class="text-center mb-16">
+                        <h2 class="text-emerald-400 font-bold uppercase tracking-widest text-sm mb-3">${t.features.heading[state.lang]}</h2>
+                        <h3 class="text-4xl font-bold text-white ${state.lang === 'ur' ? 'leading-relaxed' : ''}">${t.features.subheading[state.lang]}</h3>
+                    </div>` : ''}
+
+                    <div class="grid md:grid-cols-4 gap-6">
+                        ${t.features.list.map((f, i) => `
+                            <div class="glass-panel glass-panel-hover p-6 rounded-2xl group flex flex-col items-center text-center cursor-default">
+                                <div class="bg-gradient-to-br from-emerald-500/10 to-amber-500/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 border border-white/5 group-hover:border-amber-500/30 transition-colors shadow-lg">
+                                    <i data-lucide="${f.icon}" class="w-8 h-8 text-emerald-400 group-hover:text-amber-400 transition-colors"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-white mb-2 ${state.lang === 'ur' ? 'text-xl' : ''}">${f.title[state.lang]}</h3>
+                                <p class="text-gray-400 text-sm leading-6 ${state.lang === 'ur' ? 'text-base' : ''}">${f.desc[state.lang]}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+            `;
+        };
+
+        const AIScan = () => {
+            let content = '';
+
+            if (state.scanState === 'idle') {
+                content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white mb-2">${t.scan.heading[state.lang]}</h2>
+                    <p class="text-gray-400 text-sm">${t.scan.desc[state.lang]}</p>
+                </div>
+
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md mb-6">
+                    <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3 text-center">${t.scan.selectMode[state.lang]}</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setScanMode('disease')" class="py-2 px-1 rounded-lg text-xs font-bold transition-all ${state.scanMode === 'disease' ? 'bg-amber-500 text-black shadow-lg' : 'bg-black/40 text-gray-400 hover:bg-white/10'}">
+                            ${t.scan.optDisease[state.lang]}
+                        </button>
+                        <button onclick="setScanMode('pest')" class="py-2 px-1 rounded-lg text-xs font-bold transition-all ${state.scanMode === 'pest' ? 'bg-red-500 text-white shadow-lg' : 'bg-black/40 text-gray-400 hover:bg-white/10'}">
+                            ${t.scan.optPest[state.lang]}
+                        </button>
+                        <button onclick="setScanMode('both')" class="py-2 px-1 rounded-lg text-xs font-bold transition-all ${state.scanMode === 'both' ? 'bg-emerald-500 text-white shadow-lg' : 'bg-black/40 text-gray-400 hover:bg-white/10'}">
+                            ${t.scan.optBoth[state.lang]}
+                        </button>
+                    </div>
+                </div>
+
+                <div onclick="handleScan('https://images.unsplash.com/photo-1592878904946-b3cd8ae243d9?q=80&w=1000&auto=format&fit=crop', null)" 
+                     class="flex-1 border-2 border-dashed border-emerald-500/30 bg-emerald-900/10 rounded-3xl flex flex-col items-center justify-center p-8 cursor-pointer hover:bg-emerald-900/20 transition-all hover:border-emerald-500 group min-h-[200px]">
+                    <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i data-lucide="scan-line" class="w-10 h-10 text-emerald-400"></i>
+                    </div>
+                    <p class="text-white font-bold text-lg">${t.scan.upload[state.lang]}</p>
+                    <p class="text-gray-500 text-sm mt-1">Supports JPG, PNG</p>
+                </div>
+
+                <div class="mt-8">
+                    <p class="text-gray-400 text-sm mb-4 font-medium ml-2">${t.scan.tryDemo[state.lang]}</p>
+                    <div class="grid grid-cols-3 gap-3">
+                        ${demos.map(d => `
+                            <button onclick="handleScan('${d.img}', ${d.id})" class="relative group rounded-xl overflow-hidden aspect-square border border-white/10 hover:border-amber-400 transition-all">
+                                <img src="${d.img}" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+                                <div class="absolute bottom-0 inset-x-0 bg-black/60 p-1">
+                                    <p class="text-[10px] text-white text-center font-bold truncate">${t.scan[d.nameKey][state.lang]}</p>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>`;
+            } 
+            else if (state.scanState === 'scanning') {
+                content = `
+                <div class="flex-1 flex flex-col items-center justify-center text-center h-full">
+                    <div class="relative w-64 h-64 mb-8 rounded-2xl overflow-hidden border-4 border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+                        <img src="${state.selectedImage}" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-emerald-500/20 animate-Verse"></div>
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-amber-400 shadow-[0_0_15px_#fbbf24] animate-scan"></div>
+                        <div class="absolute top-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded">
+                            Scanning: ${state.scanMode.toUpperCase()}
+                        </div>
+                    </div>
+                    
+                    <div class="w-full max-w-xs mb-4">
+                        <div class="flex justify-between text-xs text-amber-400 mb-2 uppercase tracking-wider font-bold">
+                            <span>${t.scan.analyzing[state.lang]}</span>
+                            <span id="scan-progress-text">${state.scanProgress}%</span>
+                        </div>
+                        <div class="h-2 bg-gray-800 rounded-full overflow-hidden border border-white/10">
+                            <div id="scan-progress-bar" class="h-full bg-amber-500 transition-all duration-75 shadow-[0_0_15px_rgba(245,158,11,0.6)]" style="width: ${state.scanProgress}%"></div>
+                        </div>
+                    </div>
+                </div>`;
+            } 
+            else if (state.scanState === 'result') {
+                let resultHTML = '';
+                const r = state.scanResultData;
+
+                if (state.scanMode === 'disease' || state.scanMode === 'both') {
+                    resultHTML += `
+                    <div class="mb-3">
+                        <span class="text-amber-500 font-bold text-xs tracking-wider uppercase">DISEASE</span>
+                        <p class="text-white font-medium text-lg">${r.disease[state.lang]}</p>
+                    </div>`;
+                }
+                if (state.scanMode === 'pest' || state.scanMode === 'both') {
+                    resultHTML += `
+                    <div class="mb-3">
+                        <span class="text-red-400 font-bold text-xs tracking-wider uppercase">PEST</span>
+                        <p class="text-white font-medium text-lg">${r.pest[state.lang]}</p>
+                    </div>`;
+                }
+
+                content = `
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl animate-fade-in-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-white">${t.scan.resultTitle[state.lang]}</h3>
+                        <div class="bg-emerald-500 text-black text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                            <i data-lucide="check-circle" class="w-3 h-3"></i> 98% Confidence
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <img src="${state.selectedImage}" class="w-full sm:w-24 h-24 rounded-xl object-cover border-2 border-white/10" />
+                        <div class="flex-1">
+                            ${resultHTML}
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-900/40 rounded-xl p-4 border border-emerald-500/20 mb-6">
+                        <h4 class="text-emerald-400 font-bold mb-2 flex items-center gap-2">
+                            <i data-lucide="sprout" class="w-4 h-4"></i> ${t.scan.treatment[state.lang]}
+                        </h4>
+                        <p class="text-gray-200 text-sm leading-relaxed">
+                            ${r.cure[state.lang]}
+                        </p>
+                    </div>
+
+                    <button onclick="resetScan()" class="w-full py-4 bg-white text-emerald-900 rounded-xl font-bold hover:bg-gray-200 transition-colors shadow-lg">
+                        ${t.scan.scanAgain[state.lang]}
+                    </button>
+                </div>`;
+            }
+
+            return `
+            <div class="min-h-screen pt-24 pb-12 px-6 bg-[#022c22] flex flex-col items-center justify-center relative">
+                <div class="absolute inset-0 mesh-gradient z-0"></div>
+                <div class="w-full max-w-lg relative z-10 flex-1 flex flex-col justify-center">
+                    ${content}
+                </div>
+            </div>`;
+        };
+
+        const Pricing = () => {
+            const plans = [
+                { 
+                    name: t.pricing.p1Name[state.lang], 
+                    price: t.pricing.p1Price[state.lang],
+                    duration: t.pricing.p1Duration[state.lang],
+                    desc: t.pricing.p1Desc[state.lang],
+                    features: [t.pricing.f1[state.lang], t.pricing.f2[state.lang], t.pricing.f3[state.lang], t.pricing.f4[state.lang]], 
+                    btn: t.pricing.btn1[state.lang],
+                    active: false 
+                },
+                { 
+                    name: t.pricing.p2Name[state.lang], 
+                    price: t.pricing.p2Price[state.lang],
+                    duration: t.pricing.p2Duration[state.lang],
+                    desc: t.pricing.p2Desc[state.lang],
+                    features: [t.pricing.f5[state.lang], t.pricing.f6[state.lang], t.pricing.f7[state.lang], t.pricing.f8[state.lang], t.pricing.f9[state.lang]], 
+                    btn: t.pricing.btn2[state.lang],
+                    active: true 
+                },
+                { 
+                    name: t.pricing.p3Name[state.lang], 
+                    price: t.pricing.p3Price[state.lang],
+                    desc: t.pricing.p3Desc[state.lang],
+                    features: [t.pricing.f10[state.lang], t.pricing.f11[state.lang], t.pricing.f12[state.lang], t.pricing.f13[state.lang], t.pricing.f14[state.lang]], 
+                    btn: t.pricing.btn3[state.lang],
+                    active: false 
+                },
+            ];
+
+            return `
+            <div class="min-h-screen pt-32 pb-20 px-6 bg-[#022c22]">
+                <div class="container mx-auto max-w-7xl">
+                    <div class="text-center mb-20">
+                        <h2 class="text-4xl font-bold text-white mb-4">${t.pricing.heading[state.lang]}</h2>
+                        <p class="text-gray-400 text-lg">${t.pricing.subheading[state.lang]}</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8 items-stretch">
+                        ${plans.map((plan, idx) => `
+                            <div class="glass-panel rounded-3xl p-8 relative ${plan.active ? 'scale-105 z-10 border-amber-500/50 shadow-2xl shadow-emerald-900/50 bg-gradient-to-br from-[#064e3b]/80 to-[#022c22]/80' : 'border-white/5 opacity-85 hover:opacity-100 hover:scale-102'} transition-all duration-500 flex flex-col">
+                                ${plan.active ? `<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-black font-bold text-xs px-4 py-1.5 rounded-full uppercase shadow-lg shadow-amber-500/40 tracking-wider">${t.pricing.popular[state.lang]}</div>` : ''}
+                                
+                                <h3 class="text-2xl font-bold text-white mb-2">${plan.name}</h3>
+                                <div class="flex items-baseline gap-1 mb-1">
+                                    <span class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-300">${plan.price}</span>
+                                    ${plan.duration ? `<span class="text-gray-400 text-sm">${plan.duration}</span>` : ''}
+                                </div>
+                                <p class="text-gray-400 text-sm mb-8">${plan.desc}</p>
+                                
+                                <ul class="space-y-4 mb-10 flex-1">
+                                    ${plan.features.map(f => `
+                                        <li class="flex items-start gap-3 text-emerald-100/90 text-sm font-medium">
+                                            <div class="bg-emerald-500/20 p-1 rounded-full shrink-0 mt-0.5"><i data-lucide="check" class="w-3 h-3 text-emerald-400"></i></div> 
+                                            <span class="${state.lang === 'ur' ? 'text-base' : ''}">${f}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+
+                                <button class="w-full py-4 rounded-xl font-bold transition-all ${plan.active ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-700/50' : 'bg-white/5 hover:bg-white/10 text-white border border-white/5'}">
+                                    ${plan.btn}
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>`;
+        };
+
+        const Dashboard = () => {
+             return `
+            <div class="min-h-screen pt-28 pb-12 px-4 md:px-8 bg-[#022c22]">
+                <div class="mb-10 flex flex-col md:flex-row justify-between md:items-end gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white">${t.dashboard.welcome[state.lang]}</h2>
+                        <p class="text-emerald-400/80 text-sm mt-1 font-medium">${t.dashboard.user[state.lang]}</p>
+                    </div>
+                    <div class="text-right ${state.lang === 'ur' ? 'text-left' : ''}">
+                        <div class="flex items-center justify-end gap-2 text-white font-bold text-xl">
+                            <i data-lucide="map-pin" class="w-[18px] h-[18px] text-amber-500"></i> ${t.dashboard.location[state.lang]}
+                        </div>
+                        <p class="text-gray-500 text-xs mt-1 flex items-center justify-end gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-Verse"></span> Updated: Live</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-auto md:grid-rows-3 gap-6 md:h-[800px]">
+                    <div class="glass-panel p-6 rounded-3xl md:col-span-1 md:row-span-1 flex flex-col justify-between hover:border-amber-500/30 transition-colors group">
+                        <div class="flex justify-between items-start">
+                            <div class="p-3 bg-gradient-to-br from-amber-400/20 to-orange-500/20 rounded-2xl text-amber-400 border border-amber-500/10 group-hover:scale-110 transition-transform">
+                                <i data-lucide="sun" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${t.dashboard.weather[state.lang]}</span>
+                        </div>
+                        <div>
+                            <div class="text-5xl font-bold text-white tracking-tighter">32°C</div>
+                            <div class="text-emerald-400/80 text-sm flex items-center gap-2 mt-2 font-medium">
+                                <i data-lucide="droplets" class="w-3.5 h-3.5"></i> 65% ${t.dashboard.humidity[state.lang]}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-3xl md:col-span-1 md:row-span-2 overflow-hidden flex flex-col">
+                        <div class="flex items-center gap-2 mb-6 text-emerald-400 border-b border-white/5 pb-4">
+                            <i data-lucide="trending-up" class="w-5 h-5"></i>
+                            <span class="font-bold uppercase text-xs tracking-wider">${t.dashboard.mandi[state.lang]}</span>
+                        </div>
+                        <div class="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                            ${[
+                                { crop: state.lang === 'ur' ? 'گندم (40 کلو)' : 'Wheat (40kg)', price: '3,900', trend: 'up' },
+                                { crop: state.lang === 'ur' ? 'کپاس' : 'Cotton', price: '8,500', trend: 'down' },
+                                { crop: state.lang === 'ur' ? 'چاول سپر' : 'Rice Super', price: '4,200', trend: 'up' },
+                                { crop: state.lang === 'ur' ? 'مکئی' : 'Maize', price: '2,100', trend: 'up' },
+                                { crop: state.lang === 'ur' ? 'گنا' : 'Sugarcane', price: '450', trend: 'neutral' },
+                            ].map(item => `
+                                <div class="flex justify-between items-center group cursor-pointer hover:bg-white/5 p-3 rounded-xl transition-all border border-transparent hover:border-white/5">
+                                    <div>
+                                        <p class="text-white text-sm font-bold group-hover:text-amber-400 transition-colors">${item.crop}</p>
+                                        <p class="text-gray-600 text-[10px] uppercase font-bold">${t.dashboard.avg[state.lang]}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-white font-bold font-mono">${item.price}</p>
+                                        <span class="text-[10px] font-bold ${item.trend === 'up' ? 'text-green-500' : item.trend === 'down' ? 'text-red-500' : 'text-gray-500'}">
+                                            ${item.trend === 'up' ? '▲ +2.4%' : item.trend === 'down' ? '▼ -1.1%' : '• 0.0%'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-2 rounded-3xl md:col-span-2 md:row-span-2 relative overflow-hidden group border-0 shadow-2xl">
+                        <div class="absolute top-6 left-6 z-20 bg-black/80 backdrop-blur-md text-emerald-400 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest flex items-center gap-2 border border-emerald-500/30">
+                            <div class="w-2 h-2 rounded-full bg-red-500 animate-Verse"></div> ${t.dashboard.satellite[state.lang]}
+                        </div>
+                        
+                        <div class="w-full h-full bg-[#051f18] rounded-2xl relative overflow-hidden group">
+                            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#10b981 1px, transparent 1px); background-size: 20px 20px;"></div>
+                            <div class="absolute top-[20%] left-[20%] w-[30%] h-[25%] bg-emerald-500/20 border-2 border-emerald-500/60 hover:bg-emerald-500/40 transition-all cursor-pointer flex items-center justify-center text-xs text-white font-bold backdrop-blur-sm rounded-lg hover:scale-105 z-10 shadow-lg group/field">
+                                <span class="bg-black/50 px-2 py-1 rounded">${t.dashboard.fieldA[state.lang]}</span>
+                            </div>
+                            <div class="absolute top-[25%] left-[55%] w-[25%] h-[35%] bg-amber-600/20 border-2 border-amber-500/60 hover:bg-amber-600/30 transition-all cursor-pointer flex items-center justify-center text-xs text-white font-bold backdrop-blur-sm rounded-lg hover:scale-105 z-10 shadow-lg">
+                                <span class="bg-black/50 px-2 py-1 rounded">${t.dashboard.fieldB[state.lang]}</span>
+                            </div>
+                            <div class="absolute bottom-[15%] right-[25%] w-[40%] h-[20%] bg-blue-600/20 border-2 border-blue-500/60 hover:bg-blue-600/30 transition-all cursor-pointer flex items-center justify-center text-xs text-white font-bold backdrop-blur-sm rounded-lg hover:scale-105 z-10 shadow-lg">
+                                <span class="bg-black/50 px-2 py-1 rounded">${t.dashboard.fieldC[state.lang]}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-3xl md:col-span-1 md:row-span-1">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-gray-400 text-[10px] font-bold uppercase tracking-widest">${t.dashboard.soil[state.lang]}</h3>
+                            <div class="bg-blue-500/20 p-2 rounded-lg text-blue-400"><i data-lucide="sprout" class="w-4 h-4"></i></div>
+                        </div>
+                        <div class="relative h-3 bg-gray-800 rounded-full overflow-hidden mb-3">
+                            <div class="absolute top-0 left-0 h-full w-[45%] bg-gradient-to-r from-blue-600 to-blue-400"></div>
+                        </div>
+                        <div class="flex justify-between text-xs font-medium">
+                            <span class="text-white">45% (${t.dashboard.adequate[state.lang]})</span>
+                            <span class="text-gray-500">${t.dashboard.target[state.lang]}: 50%</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-3xl md:col-span-1 md:row-span-1 bg-gradient-to-br from-red-900/40 to-[#022c22] border border-red-500/20">
+                        <h3 class="text-red-300/70 text-[10px] font-bold uppercase mb-4 tracking-widest">${t.dashboard.spray[state.lang]}</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="bg-red-500/20 p-3 rounded-xl text-red-500">
+                                <i data-lucide="wind" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-white font-bold text-sm">${t.dashboard.notSuitable[state.lang]}</p>
+                                <p class="text-xs text-red-300/60 mt-0.5">${t.dashboard.windHigh[state.lang]}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-3xl md:col-span-2 md:row-span-1 overflow-y-auto">
+                        <h3 class="text-gray-400 text-[10px] font-bold uppercase mb-4 tracking-widest">${t.dashboard.alerts[state.lang]}</h3>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="bg-amber-500/5 border border-amber-500/20 p-4 rounded-2xl flex-1 flex items-start gap-3 hover:bg-amber-500/10 transition-colors cursor-pointer">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 mt-0.5 shrink-0"></i>
+                                <div>
+                                    <p class="text-white text-sm font-bold">${t.dashboard.alert1Title[state.lang]}</p>
+                                    <p class="text-gray-400 text-xs mt-1 leading-relaxed">${t.dashboard.alert1Desc[state.lang]}</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-500/5 border border-blue-500/20 p-4 rounded-2xl flex-1 flex items-start gap-3 hover:bg-blue-500/10 transition-colors cursor-pointer">
+                                <i data-lucide="droplets" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                                <div>
+                                    <p class="text-white text-sm font-bold">${t.dashboard.alert2Title[state.lang]}</p>
+                                    <p class="text-gray-400 text-xs mt-1 leading-relaxed">${t.dashboard.alert2Desc[state.lang]}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        };
+
+        const Contact = () => {
+            return `
+            <div class="min-h-screen pt-32 pb-20 px-6 bg-[#022c22] relative">
+                <div class="absolute inset-0 mesh-gradient z-0 fixed"></div>
+                
+                <div class="container mx-auto max-w-4xl relative z-10">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 ${state.lang === 'ur' ? 'leading-tight' : ''}">${t.contact.heading[state.lang]}</h2>
+                        <p class="text-xl text-gray-300">${t.contact.desc[state.lang]}</p>
+                    </div>
+
+                    <div class="glass-panel p-8 md:p-10 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-emerald-900/80 to-black/80 relative overflow-hidden mb-12 shadow-2xl">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px]"></div>
+                        <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                            
+                            <div class="flex -space-x-4">
+                                <img src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=400&auto=format&fit=crop" class="w-20 h-20 object-cover rounded-full border-4 border-[#022c22] shadow-xl"/>
+                                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop" class="w-20 h-20 object-cover rounded-full border-4 border-[#022c22] shadow-xl"/>
+                                <div class="w-20 h-20 rounded-full border-4 border-[#022c22] bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-xl">+5</div>
+                            </div>
+
+                            <div class="flex-1 text-center md:text-left">
+                                <h3 class="text-2xl font-bold text-white mb-2 ${state.lang === 'ur' ? 'text-3xl' : ''}">${t.expert.heading[state.lang]}</h3>
+                                <p class="text-gray-300 mb-6 leading-relaxed ${state.lang === 'ur' ? 'text-lg' : ''}">${t.expert.sub[state.lang]}</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                                    <button class="px-6 py-3 bg-white text-emerald-900 rounded-xl font-bold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 shadow-lg">
+                                        <i data-lucide="phone-call" class="w-5 h-5"></i> ${t.expert.call[state.lang]}
+                                    </button>
+                                    <button class="px-6 py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-lg">
+                                        <i data-lucide="message-circle" class="w-5 h-5"></i> ${t.expert.chat[state.lang]}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-8 rounded-3xl border border-white/10">
+                        <div class="grid md:grid-cols-2 gap-12">
+                            <div class="space-y-8">
+                                <div class="flex items-start gap-4">
+                                    <div class="bg-amber-500/20 p-3 rounded-xl text-amber-500">
+                                        <i data-lucide="phone" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-bold mb-1 ${state.lang === 'ur' ? 'text-lg' : ''}">${t.contact.helpline[state.lang]}</h3>
+                                        <p class="text-emerald-400 font-mono text-lg">0800-12345</p>
+                                        <p class="text-gray-400 text-sm">Mon-Fri, 9am - 5pm</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start gap-4">
+                                    <div class="bg-emerald-500/20 p-3 rounded-xl text-emerald-400">
+                                        <i data-lucide="mail" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-bold mb-1 ${state.lang === 'ur' ? 'text-lg' : ''}">${t.contact.email[state.lang]}</h3>
+                                        <p class="text-gray-300">support@AgriVerse.pk</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-4">
+                                    <div class="bg-blue-500/20 p-3 rounded-xl text-blue-400">
+                                        <i data-lucide="map-pin" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-bold mb-1 ${state.lang === 'ur' ? 'text-lg' : ''}">${t.contact.office[state.lang]}</h3>
+                                        <p class="text-gray-300">Arfa Software Tower,<br/>Lahore, Pakistan</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form onsubmit="event.preventDefault(); alert('Message sent!');" class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-400 text-sm font-bold mb-2 ${state.lang === 'ur' ? 'text-right' : ''}">${t.contact.formName[state.lang]}</label>
+                                    <input type="text" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" placeholder="Ali Ahmed"/>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-400 text-sm font-bold mb-2 ${state.lang === 'ur' ? 'text-right' : ''}">${t.contact.formEmail[state.lang]}</label>
+                                    <input type="tel" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" placeholder="0300 1234567"/>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-400 text-sm font-bold mb-2 ${state.lang === 'ur' ? 'text-right' : ''}">${t.contact.formMsg[state.lang]}</label>
+                                    <textarea rows="4" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors resize-none" placeholder="..."></textarea>
+                                </div>
+                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-emerald-500/20">
+                                    ${t.contact.btnSend[state.lang]}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        };
+
+        const Profile = () => {
+             return `
+            <div class="min-h-screen pt-32 px-6 bg-[#022c22]">
+                <div class="container mx-auto max-w-3xl glass-panel p-10 rounded-3xl border border-white/10">
+                    <h2 class="text-2xl font-bold text-white mb-10 flex items-center gap-4 border-b border-white/10 pb-6">
+                        <div class="bg-emerald-500/20 p-2 rounded-lg"><i data-lucide="settings" class="text-emerald-400"></i></div> ${t.profile.heading[state.lang]}
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-gray-400 text-xs uppercase font-bold mb-3">${t.profile.name[state.lang]}</label>
+                                <input type="text" value="Ali Ahmed" class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-xs uppercase font-bold mb-3">${t.profile.loc[state.lang]}</label>
+                                <input type="text" value="Bahawalpur, Punjab" class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none" />
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-400 text-xs uppercase font-bold mb-3">${t.profile.plan[state.lang]}</label>
+                            <div class="flex items-center justify-between bg-gradient-to-r from-emerald-900/40 to-[#022c22] border border-emerald-500/30 p-6 rounded-2xl">
+                                <div>
+                                    <p class="text-white font-bold text-lg">${t.pricing.p2Name[state.lang]}</p>
+                                    <p class="text-emerald-400 text-sm mt-1">${t.profile.valid[state.lang]}</p>
+                                </div>
+                                <button class="text-xs bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg font-bold transition-colors shadow-lg shadow-emerald-500/20">${t.profile.upgrade[state.lang]}</button>
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <button class="bg-white text-emerald-950 px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all shadow-lg">
+                                ${t.profile.save[state.lang]}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        };
+
+        const Demo = () => {
+            const lessons = [
+                { title: t.demo.lesson1[state.lang], icon: 'scan-line', desc: state.lang === 'en' ? 'Upload photos of your crops and get instant disease & pest detection using AI' : 'اپنی فصلوں کی تصویریں اپ لوڈ کریں اور فوری بیماری اور کیڑوں کی پہچان حاصل کریں' },
+                { title: t.demo.lesson2[state.lang], icon: 'trending-up', desc: state.lang === 'en' ? 'Check live mandi rates across Punjab and Sindh to sell at best prices' : 'پنجاب اور سندھ میں براہ راست منڈی کے نرخ چیک کریں' },
+                { title: t.demo.lesson3[state.lang], icon: 'cloud-rain', desc: state.lang === 'en' ? 'Get hyper-local weather forecasts and alerts for your exact location' : 'اپنی جگہ کے لیے موسم کی پیشن گوئی اور انتباہات حاصل کریں' },
+                { title: t.demo.lesson4[state.lang], icon: 'message-circle', desc: state.lang === 'en' ? 'Chat with agriculture experts via WhatsApp or call for urgent help' : 'فوری مدد کے لیے ماہرین سے بات کریں' },
+            ];
+
+            return `
+            <div class="min-h-screen pt-28 pb-20 px-6 bg-[#022c22]">
+                <div class="container mx-auto max-w-5xl">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 ${state.lang === 'ur' ? 'leading-tight' : ''}">${t.demo.heading[state.lang]}</h2>
+                        <p class="text-gray-400 text-lg">${t.demo.desc[state.lang]}</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 mb-16">
+                        ${lessons.map((lesson, i) => `
+                            <div class="glass-panel p-8 rounded-3xl border border-white/10 hover:border-emerald-500/30 transition-all group cursor-default">
+                                <div class="flex items-start gap-4 mb-4">
+                                    <div class="bg-gradient-to-br from-emerald-500/20 to-amber-500/10 p-4 rounded-2xl group-hover:scale-110 transition-transform">
+                                        <i data-lucide="${lesson.icon}" class="w-6 h-6 text-emerald-400"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="text-xs font-bold text-amber-500 uppercase tracking-wider">Step ${i + 1}</span>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-white ${state.lang === 'ur' ? 'text-2xl' : ''}">${lesson.title}</h3>
+                                    </div>
+                                </div>
+                                <p class="text-gray-400 leading-relaxed ${state.lang === 'ur' ? 'text-lg' : ''}">${lesson.desc}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="glass-panel p-10 rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-900/40 to-[#022c22] mb-12">
+                        <div class="flex flex-col md:flex-row items-center gap-8">
+                            <div class="flex-1">
+                                <h3 class="text-3xl font-bold text-white mb-4">${state.lang === 'en' ? 'Ready to Start?' : 'شروع کرنے کے لیے تیار ہیں؟'}</h3>
+                                <p class="text-gray-300 mb-6 leading-relaxed">${state.lang === 'en' ? 'Join thousands of Pakistani farmers already using AgriVerse to increase yield and save time.' : 'ہزاروں پاکستانی کسانوں کے ساتھ شامل ہوں جو ایگرو پلس استعمال کر رہے ہیں۔'}</p>
+                                <button onclick="setPage('signup')" class="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-bold transition-all shadow-lg">
+                                    ${state.lang === 'en' ? 'Create Free Account' : 'مفت اکاؤنٹ بنائیں'}
+                                </button>
+                            </div>
+                            <div class="w-48 h-48 bg-gradient-to-br from-emerald-500/20 to-amber-500/10 rounded-2xl flex items-center justify-center text-6xl">
+                                <i data-lucide="leaf" class="w-24 h-24 text-emerald-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        };
+
+        const Signup = () => {
+            let formContent = '';
+
+            if (state.signupStep === 1) {
+                formContent = `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-white mb-8">${t.signup.step1Title[state.lang]}</h3>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.contact.formName[state.lang]}</label>
+                        <input type="text" placeholder="${t.signup.fname[state.lang]}" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.contact.formEmail[state.lang]}</label>
+                        <input type="email" placeholder="${t.signup.email[state.lang]}" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.phone[state.lang]}</label>
+                        <input type="tel" placeholder="0300-1234567" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.fatherName[state.lang]}</label>
+                        <input type="text" placeholder="${t.signup.fatherName[state.lang]}" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.cnic[state.lang]}</label>
+                        <input type="text" placeholder="12345-6789012-1" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.password[state.lang]}</label>
+                        <input type="password" placeholder="••••••••" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.confirmPassword[state.lang]}</label>
+                        <input type="password" placeholder="••••••••" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                </div>`;
+            } else if (state.signupStep === 2) {
+                formContent = `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-white mb-8">${t.signup.step2Title[state.lang]}</h3>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.district[state.lang]}</label>
+                        <select class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">Select District</option>
+                            <option>Bahawalpur</option>
+                            <option>Lahore</option>
+                            <option>Karachi</option>
+                            <option>Multan</option>
+                            <option>Hyderabad</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.landSize[state.lang]}</label>
+                        <input type="number" placeholder="5" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.cropSelect[state.lang]}</label>
+                        <select class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">Select Crop</option>
+                            <option>Wheat</option>
+                            <option>Rice</option>
+                            <option>Cotton</option>
+                            <option>Maize</option>
+                            <option>Sugarcane</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${t.signup.irrigationSelect[state.lang]}</label>
+                        <select class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">Select Type</option>
+                            <option>Canal Water</option>
+                            <option>Tube Well</option>
+                            <option>Both</option>
+                            <option>Rain-fed</option>
+                        </select>
+                    </div>
+                </div>`;
+            } else if (state.signupStep === 3) {
+                formContent = `
+                <div class="space-y-8 text-center">
+                    <h3 class="text-3xl font-bold text-white">${t.signup.step3Title[state.lang]}</h3>
+                    <div class="bg-gradient-to-br from-emerald-500/20 to-[#022c22] border border-emerald-500/30 p-12 rounded-3xl">
+                        <i data-lucide="check-circle" class="w-20 h-20 text-emerald-400 mx-auto mb-4"></i>
+                        <p class="text-xl text-white font-bold mb-4">${state.lang === 'en' ? 'Review Your Information' : 'اپنی معلومات کا جائزہ لیں'}</p>
+                        <p class="text-gray-400 mb-8">${state.lang === 'en' ? 'Please verify all your details before completing signup.' : 'رجسٹریشن مکمل کرنے سے پہلے اپنی تمام معلومات کی تصدیق کریں۔'}</p>
+                    </div>
+                    <div class="space-y-3 text-left">
+                        <div class="flex justify-between p-4 bg-white/5 rounded-lg border border-white/5">
+                            <span class="text-gray-400">Email:</span>
+                            <span class="text-white font-bold">user@example.com</span>
+                        </div>
+                        <div class="flex justify-between p-4 bg-white/5 rounded-lg border border-white/5">
+                            <span class="text-gray-400">District:</span>
+                            <span class="text-white font-bold">Bahawalpur</span>
+                        </div>
+                        <div class="flex justify-between p-4 bg-white/5 rounded-lg border border-white/5">
+                            <span class="text-gray-400">Primary Crop:</span>
+                            <span class="text-white font-bold">Wheat</span>
+                        </div>
+                    </div>
+                    <label class="flex items-center gap-3 justify-center text-gray-400 cursor-pointer hover:text-white transition-colors">
+                        <input type="checkbox" class="w-5 h-5 rounded border-white/20 bg-black/20" />
+                        <span class="text-sm">${t.signup.terms[state.lang]}</span>
+                    </label>
+                </div>`;
+            }
+
+            return `
+            <div class="min-h-screen pt-28 pb-20 px-6 bg-[#022c22] relative">
+                <div class="absolute inset-0 mesh-gradient z-0 fixed"></div>
+                
+                <div class="container mx-auto max-w-2xl relative z-10">
+                    <div class="mb-12">
+                        <h1 class="text-4xl font-bold text-white mb-2 text-center">${t.signup.heading[state.lang]}</h1>
+                        <div class="flex justify-center gap-8 mt-8">
+                            ${[1, 2, 3].map(step => `
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold ${state.signupStep >= step ? 'bg-emerald-600 text-white' : 'bg-white/10 text-gray-400'} border ${state.signupStep >= step ? 'border-emerald-500' : 'border-white/20'}">
+                                        ${state.signupStep > step ? '<i data-lucide="check" class="w-5 h-5"></i>' : step}
+                                    </div>
+                                    ${step < 3 ? '<div class="w-8 h-1 bg-white/20"></div>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-10 rounded-3xl border border-white/10">
+                        ${formContent}
+
+                        <div class="flex gap-4 mt-10">
+                            ${state.signupStep > 1 ? `
+                                <button onclick="setSignupStep(${state.signupStep - 1})" class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-colors border border-white/10">
+                                    ${state.lang === 'en' ? 'Back' : 'پیچھے'}
+                                </button>
+                            ` : ''}
+                            <button 
+                                onclick="setSignupStep(${state.signupStep < 3 ? state.signupStep + 1 : 1}); ${state.signupStep === 3 ? "setPage('home')" : ''}"
+                                class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg"
+                            >
+                                ${state.signupStep === 1 ? t.signup.next[state.lang] : state.signupStep === 2 ? state.lang === 'en' ? 'Review Details' : 'تفصیلات کا جائزہ' : t.signup.confirm[state.lang]}
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="text-center text-gray-500 text-sm mt-6">
+                        ${state.lang === 'en' ? 'Already have an account?' : 'پہلے سے اکاؤنٹ ہے؟'} 
+                        <span onclick="setPage('contact')" class="text-emerald-400 hover:text-emerald-300 cursor-pointer font-bold">${state.lang === 'en' ? 'Contact Support' : 'سپورٹ سے رابطہ کریں'}</span>
+                    </p>
+                </div>
+            </div>`;
+        };
+
+        const WeatherGuidance = () => {
+            const districts = Object.keys(weatherDataByDistrict);
+            const weatherData = weatherDataByDistrict[state.userDistrict];
+            const recommendations = getWeatherRecommendation();
+
+            if (!weatherData) {
+                return `<div class="min-h-screen pt-28 pb-20 px-6 bg-[#022c22] flex items-center justify-center">
+                    <div class="glass-panel p-12 rounded-3xl border border-white/10 text-center max-w-md">
+                        <i data-lucide="alert-circle" class="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                        <p class="text-gray-400">${t.weather.noData[state.lang]}</p>
+                    </div>
+                </div>`;
+            }
+
+            return `
+            <div class="min-h-screen pt-28 pb-20 px-6 bg-[#022c22]">
+                <div class="container mx-auto max-w-6xl">
+                    <!-- Header -->
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold text-white mb-2">${t.weather.heading[state.lang]}</h2>
+                        <p class="text-gray-400 text-lg">${t.weather.subheading[state.lang]}</p>
+                    </div>
+
+                    <!-- District Selector -->
+                    <div class="mb-8 flex flex-wrap gap-2 justify-center">
+                        ${districts.map(district => `
+                            <button 
+                                onclick="loadWeatherForDistrict('${district}')"
+                                class="px-4 py-2 rounded-xl font-bold transition-all ${state.userDistrict === district ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white/5 text-gray-300 hover:bg-white/10'}"
+                            >
+                                ${district}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    ${state.isLoadingWeather ? `
+                        <div class="glass-panel p-12 rounded-3xl border border-white/10 text-center">
+                            <i data-lucide="cloud" class="w-12 h-12 text-emerald-400 mx-auto mb-4 animate-bounce"></i>
+                            <p class="text-gray-400">${t.weather.loading[state.lang]}</p>
+                        </div>
+                    ` : `
+                        <!-- Current Weather Widget -->
+                        <div class="glass-panel p-8 rounded-3xl border border-emerald-500/30 mb-8 bg-gradient-to-r from-emerald-900/40 to-[#022c22]">
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <div class="text-6xl font-bold text-white">${weatherData.current.temp}°C</div>
+                                        <div>
+                                            <i data-lucide="${weatherData.current.icon}" class="w-16 h-16 text-amber-400"></i>
+                                            <p class="text-gray-400 text-sm mt-2">${state.lang === 'en' ? weatherData.current.condition : 'موسم'}</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-sm">${t.weather.updated[state.lang]}: ${state.weatherLastRefresh ? state.weatherLastRefresh.toLocaleTimeString() : 'N/A'}</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-black/40 p-4 rounded-xl border border-white/10">
+                                        <p class="text-gray-500 text-sm">${t.weather.humidity[state.lang]}</p>
+                                        <p class="text-2xl font-bold text-emerald-400">${weatherData.current.humidity}%</p>
+                                    </div>
+                                    <div class="bg-black/40 p-4 rounded-xl border border-white/10">
+                                        <p class="text-gray-500 text-sm">${t.weather.windSpeed[state.lang]}</p>
+                                        <p class="text-2xl font-bold text-blue-400">${weatherData.current.windSpeed} km/h</p>
+                                    </div>
+                                    <div class="bg-black/40 p-4 rounded-xl border border-white/10">
+                                        <p class="text-gray-500 text-sm">${t.weather.rainfall[state.lang]}</p>
+                                        <p class="text-2xl font-bold text-cyan-400">${weatherData.current.rainfall}mm</p>
+                                    </div>
+                                    <div class="bg-black/40 p-4 rounded-xl border border-white/10">
+                                        <p class="text-gray-500 text-sm">Feels Like</p>
+                                        <p class="text-2xl font-bold text-orange-400">${weatherData.current.feelsLike}°C</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alerts -->
+                        ${state.weatherAlerts.length > 0 ? `
+                            <div class="grid gap-4 mb-8">
+                                ${state.weatherAlerts.map(alert => `
+                                    <div class="glass-panel p-6 rounded-2xl border ${alert.severity === 'high' ? 'border-red-500/50 bg-red-900/20' : 'border-amber-500/50 bg-amber-900/20'}">
+                                        <div class="flex items-start gap-4">
+                                            <i data-lucide="${alert.type === 'frost' ? 'snowflake' : 'cloud-rain'}" class="w-6 h-6 ${alert.severity === 'high' ? 'text-red-400' : 'text-amber-400'} flex-shrink-0 mt-1"></i>
+                                            <div>
+                                                <p class="font-bold ${alert.severity === 'high' ? 'text-red-400' : 'text-amber-400'}">${alert.message[state.lang]}</p>
+                                                <p class="text-gray-400 text-sm mt-2">${alert.type === 'frost' ? `Min: ${alert.minTemp}°C, Time: ${alert.time}` : `Expected: ${alert.rainfall}mm`}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <!-- Recommendations -->
+                        ${recommendations && recommendations.length > 0 ? `
+                            <div class="mb-8">
+                                <h3 class="text-xl font-bold text-white mb-4">${t.weather.recommendations[state.lang]}</h3>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    ${recommendations.map(rec => `
+                                        <div class="glass-panel p-5 rounded-2xl border border-white/10 bg-${rec.color}-900/20 border-${rec.color}-500/30">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="${rec.icon}" class="w-6 h-6 text-${rec.color}-400"></i>
+                                                <p class="font-bold text-white">${rec.text}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- 7-Day Forecast -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-bold text-white mb-4">${t.weather.forecast[state.lang]}</h3>
+                            <div class="grid md:grid-cols-7 gap-3">
+                                ${state.weatherForecast.map((day, idx) => `
+                                    <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center hover:border-emerald-500/30 transition-all">
+                                        <p class="text-sm font-bold text-gray-400 mb-3">${idx === 0 ? state.lang === 'en' ? 'Today' : 'آج' : new Date(day.date).toLocaleDateString(state.lang === 'ur' ? 'ur-PK' : 'en-US', { weekday: 'short' })}</p>
+                                        <i data-lucide="${day.icon}" class="w-8 h-8 text-amber-400 mx-auto mb-2"></i>
+                                        <div class="space-y-1">
+                                            <p class="text-lg font-bold text-white">${day.maxTemp}°</p>
+                                            <p class="text-xs text-gray-500">${day.minTemp}°</p>
+                                            <div class="flex items-center justify-center gap-1 mt-2">
+                                                <i data-lucide="cloud-rain" class="w-4 h-4 text-blue-400"></i>
+                                                <span class="text-xs text-blue-400">${day.rainfall}mm</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Disease Risk -->
+                        ${Object.keys(state.diseaseRisks).length > 0 ? `
+                            <div class="mb-8">
+                                <h3 class="text-xl font-bold text-white mb-4">${t.weather.diseaseRisk[state.lang]}</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    ${Object.entries(state.diseaseRisks).map(([crop, risks]) => `
+                                        <div class="glass-panel p-6 rounded-2xl border border-white/10">
+                                            <h4 class="text-lg font-bold text-emerald-400 mb-4 capitalize">${crop}</h4>
+                                            <div class="space-y-3">
+                                                ${Object.entries(risks).map(([disease, risk]) => `
+                                                    <div>
+                                                        <div class="flex justify-between mb-2">
+                                                            <span class="text-sm text-gray-400 capitalize">${disease.replace(/([A-Z])/g, ' $1')}</span>
+                                                            <span class="text-sm font-bold ${risk > 60 ? 'text-red-400' : risk > 40 ? 'text-amber-400' : 'text-green-400'}">${risk}%</span>
+                                                        </div>
+                                                        <div class="w-full bg-black/40 rounded-full h-2">
+                                                            <div class="h-2 rounded-full ${risk > 60 ? 'bg-red-500' : risk > 40 ? 'bg-amber-500' : 'bg-green-500'}" style="width: ${risk}%"></div>
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    `}
+                </div>
+            </div>`;
+        };
+
+        const KnowledgeHub = () => {
+            const tabs = [
+                { id: 'trending', label: t.knowledgeHub.tabTrending[state.lang] },
+                { id: 'crop-insights', label: t.knowledgeHub.tabCropInsights[state.lang] },
+                { id: 'mandi-analysis', label: t.knowledgeHub.tabMandiAnalysis[state.lang] },
+                { id: 'techniques', label: t.knowledgeHub.tabTechniques[state.lang] },
+                { id: 'innovations', label: t.knowledgeHub.tabInnovations[state.lang] }
+            ];
+
+            const filteredContent = getFilteredKnowledgeContent();
+            const currentArticle = state.currentArticleId ? knowledgeContent.find(a => a.id === state.currentArticleId) : null;
+
+            return `
+            <div class="min-h-screen pt-28 pb-20 px-6 bg-[#022c22]">
+                <div class="container mx-auto max-w-6xl">
+                    ${state.currentArticleId && currentArticle ? `
+                        <!-- Article Detail View -->
+                        <div class="glass-panel rounded-3xl border border-white/10 p-8 mb-8">
+                            <button onclick="closeKnowledgeArticle()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-2">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                                <span>${state.lang === 'en' ? 'Back to Knowledge Hub' : 'علم کے مرکز پر واپس جائیں'}</span>
+                            </button>
+                            <h1 class="text-4xl font-bold text-white mb-4">${currentArticle.title[state.lang]}</h1>
+                            <div class="flex items-center gap-4 text-gray-400 text-sm mb-6">
+                                <span>${new Date(currentArticle.date).toLocaleDateString(state.lang === 'ur' ? 'ur-PK' : 'en-US')}</span>
+                                <span>•</span>
+                                <span>${currentArticle.readTime} ${t.knowledgeHub.readTime[state.lang]}</span>
+                            </div>
+                            <div class="prose text-white max-w-none">
+                                <p class="text-gray-300 leading-relaxed text-lg">${currentArticle.fullContent[state.lang]}</p>
+                            </div>
+                        </div>
+                    ` : `
+                        <!-- Hub View -->
+                        <div class="text-center mb-12">
+                            <h2 class="text-4xl font-bold text-white mb-4">${t.knowledgeHub.heading[state.lang]}</h2>
+                            <p class="text-gray-400 text-lg">${t.knowledgeHub.subheading[state.lang]}</p>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="flex flex-wrap gap-2 justify-center mb-8">
+                            ${tabs.map(tab => `
+                                <button 
+                                    onclick="setKnowledgeHubTab('${tab.id}')"
+                                    class="px-4 py-2 rounded-xl font-bold transition-all ${state.knowledgeHubTab === tab.id ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white/5 text-gray-300 hover:bg-white/10'}"
+                                >
+                                    ${tab.label}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="mb-8">
+                            <input 
+                                type="text" 
+                                placeholder="${t.knowledgeHub.search[state.lang]}"
+                                value="${state.knowledgeSearchQuery}"
+                                onkeyup="setKnowledgeSearchQuery(this.value)"
+                                class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                            />
+                        </div>
+
+                        <!-- Content Grid -->
+                        ${filteredContent.length === 0 ? `
+                            <div class="glass-panel p-12 rounded-3xl border border-white/10 text-center">
+                                <i data-lucide="search" class="w-16 h-16 text-gray-500 mx-auto mb-4"></i>
+                                <p class="text-gray-400 text-lg">${t.knowledgeHub.noResults[state.lang]}</p>
+                            </div>
+                        ` : `
+                            <div class="grid md:grid-cols-2 gap-6">
+                                ${filteredContent.map(article => `
+                                    <div class="glass-panel rounded-2xl border border-white/10 overflow-hidden hover:border-emerald-500/30 transition-all group cursor-pointer" onclick="openKnowledgeArticle('${article.id}')">
+                                        <div class="bg-gradient-to-br from-emerald-500/20 to-amber-500/10 h-40 flex items-center justify-center relative">
+                                            ${article.featured ? `<span class="absolute top-3 right-3 px-3 py-1 bg-amber-500/80 text-black text-xs font-bold rounded-full">${t.knowledgeHub.featured[state.lang]}</span>` : ''}
+                                            <i data-lucide="${article.category === 'trending' ? 'trending-up' : article.category === 'crop-insights' ? 'leaf' : article.category === 'mandi-analysis' ? 'bar-chart-3' : article.category === 'techniques' ? 'wrench' : 'lightbulb'}" class="w-12 h-12 text-emerald-400"></i>
+                                        </div>
+                                        <div class="p-5">
+                                            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">${article.title[state.lang]}</h3>
+                                            <p class="text-gray-400 text-sm mb-4 line-clamp-2">${article.description[state.lang]}</p>
+                                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                                <span>${new Date(article.date).toLocaleDateString(state.lang === 'ur' ? 'ur-PK' : 'en-US')}</span>
+                                                <span>${article.readTime} ${t.knowledgeHub.readTime[state.lang]}</span>
+                                            </div>
+                                            <button class="mt-4 w-full py-2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-lg text-sm font-bold transition-colors">
+                                                ${t.knowledgeHub.readMore[state.lang]}
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    `}
+                </div>
+            </div>`;
+        };
+
+        const MandiRates = () => {
+            return `
+            <div class="min-h-screen pt-28 pb-20 px-6 bg-[#022c22]">
+                <div class="container mx-auto max-w-7xl">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold text-white mb-4">${t.mandiRates.heading[state.lang]}</h2>
+                        <p class="text-gray-400 text-lg">${t.mandiRates.subheading[state.lang]}</p>
+                    </div>
+
+                    <!-- Mode Selector -->
+                    <div class="flex flex-wrap gap-3 justify-center mb-12">
+                        <button 
+                            onclick="setMandiRatesMode('1crop-nmandi')"
+                            class="px-6 py-3 rounded-xl font-bold transition-all ${state.mandiRatesMode === '1crop-nmandi' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white/5 text-gray-300 hover:bg-white/10'}"
+                        >
+                            ${t.mandiRates.mode1[state.lang]}
+                        </button>
+                        <button 
+                            onclick="setMandiRatesMode('ncrops-1mandi')"
+                            class="px-6 py-3 rounded-xl font-bold transition-all ${state.mandiRatesMode === 'ncrops-1mandi' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white/5 text-gray-300 hover:bg-white/10'}"
+                        >
+                            ${t.mandiRates.mode2[state.lang]}
+                        </button>
+                        <button 
+                            onclick="setMandiRatesMode('ncrops-nmandi')"
+                            class="px-6 py-3 rounded-xl font-bold transition-all ${state.mandiRatesMode === 'ncrops-nmandi' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white/5 text-gray-300 hover:bg-white/10'}"
+                        >
+                            ${t.mandiRates.mode3[state.lang]}
+                        </button>
+                    </div>
+
+                    <!-- Selection Panels -->
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <!-- Crop Selection -->
+                        <div class="glass-panel p-6 rounded-3xl border border-white/10">
+                            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <i data-lucide="leaf" class="w-5 h-5 text-emerald-400"></i>
+                                ${t.mandiRates.selectCrop[state.lang]}
+                            </h3>
+                            <div class="space-y-2">
+                                ${crops.map(crop => `
+                                    <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 cursor-pointer transition-all">
+                                        <input 
+                                            type="${state.mandiRatesMode === 'ncrops-nmandi' ? 'checkbox' : 'radio'}" 
+                                            name="crops" 
+                                            ${state.selectedCrops.includes(crop.id) ? 'checked' : ''}
+                                            onchange="toggleCropSelection('${crop.id}')"
+                                            class="w-4 h-4 rounded ${state.selectedCrops.includes(crop.id) ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}"
+                                        />
+                                        <span class="text-white font-medium">${state.lang === 'en' ? crop.name_en : crop.name_ur}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Mandi Selection -->
+                        <div class="glass-panel p-6 rounded-3xl border border-white/10">
+                            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-amber-500"></i>
+                                ${t.mandiRates.selectMandi[state.lang]}
+                            </h3>
+                            <div class="space-y-2">
+                                ${mandis.map(mandi => `
+                                    <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 cursor-pointer transition-all">
+                                        <input 
+                                            type="${state.mandiRatesMode === 'ncrops-1mandi' ? 'radio' : 'checkbox'}" 
+                                            name="mandis" 
+                                            ${state.selectedMandis.includes(mandi.id) ? 'checked' : ''}
+                                            onchange="toggleMandiSelection('${mandi.id}')"
+                                            class="w-4 h-4 rounded ${state.selectedMandis.includes(mandi.id) ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}"
+                                        />
+                                        <div class="flex-1">
+                                            <span class="text-white font-medium">${state.lang === 'en' ? mandi.name_en : mandi.name_ur}</span>
+                                            <span class="text-gray-500 text-xs ml-2">(${mandi.province})</span>
+                                        </div>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div>
+                        ${state.selectedCrops.length === 0 || state.selectedMandis.length === 0 ? `
+                            <div class="glass-panel p-12 rounded-3xl border border-emerald-500/30 text-center">
+                                <i data-lucide="alert-circle" class="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                                <p class="text-gray-400 text-lg">${t.mandiRates.noSelection[state.lang]}</p>
+                            </div>
+                        ` : state.isLoadingRates ? `
+                            <div class="glass-panel p-12 rounded-3xl border border-white/10 text-center">
+                                <div class="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
+                                <p class="text-gray-400">${t.mandiRates.loading[state.lang]}</p>
+                            </div>
+                        ` : `
+                            <!-- Rates Table -->
+                            <div class="glass-panel rounded-3xl border border-white/10 overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead class="bg-emerald-900/40 border-b border-white/10">
+                                            <tr>
+                                                <th class="px-6 py-4 text-left text-white font-bold">${state.lang === 'en' ? (state.mandiRatesMode === '1crop-nmandi' ? 'Mandi' : 'Crop') : (state.mandiRatesMode === '1crop-nmandi' ? 'منڈی' : 'فصل')}</th>
+                                                ${state.mandiRatesMode === '1crop-nmandi' ? '' : state.selectedMandis.map(mandiId => `
+                                                    <th class="px-6 py-4 text-center text-white font-bold">${mandis.find(m => m.id === mandiId)?.[state.lang === 'en' ? 'name_en' : 'name_ur']}</th>
+                                                `).join('')}
+                                                ${state.mandiRatesMode === 'ncrops-1mandi' ? '' : state.selectedCrops.map(cropId => `
+                                                    <th class="px-6 py-4 text-center text-white font-bold">${crops.find(c => c.id === cropId)?.[state.lang === 'en' ? 'name_en' : 'name_ur']}</th>
+                                                `).join('')}
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-white/10">
+                                            ${state.mandiRatesMode === '1crop-nmandi' ? 
+                                                state.selectedMandis.map(mandiId => {
+                                                    const rateData = state.mandiRatesData[state.selectedCrops[0]]?.[mandiId];
+                                                    return `
+                                                    <tr class="hover:bg-white/5 transition-colors">
+                                                        <td class="px-6 py-4 text-white font-bold">${mandis.find(m => m.id === mandiId)?.[state.lang === 'en' ? 'name_en' : 'name_ur']}</td>
+                                                        <td class="px-6 py-4 text-center">
+                                                            <div class="text-emerald-400 font-bold text-lg">Rs ${rateData?.rate}</div>
+                                                            <div class="text-xs text-gray-400">${rateData?.unit}</div>
+                                                        </td>
+                                                        <td class="px-6 py-4 text-center">
+                                                            <span class="text-green-400 text-sm font-bold">${rateData?.trend}</span>
+                                                        </td>
+                                                        <td class="px-6 py-4 text-center text-gray-400 text-xs">${rateData?.high ? 'H: Rs ' + rateData.high : ''}</td>
+                                                    </tr>
+                                                    `;
+                                                }).join('')
+                                            : state.mandiRatesMode === 'ncrops-1mandi' ?
+                                                state.selectedCrops.map(cropId => {
+                                                    const rateData = state.mandiRatesData[cropId]?.[state.selectedMandis[0]];
+                                                    return `
+                                                    <tr class="hover:bg-white/5 transition-colors">
+                                                        <td class="px-6 py-4 text-white font-bold">${crops.find(c => c.id === cropId)?.[state.lang === 'en' ? 'name_en' : 'name_ur']}</td>
+                                                        <td class="px-6 py-4 text-center">
+                                                            <div class="text-emerald-400 font-bold text-lg">Rs ${rateData?.rate}</div>
+                                                            <div class="text-xs text-gray-400">${rateData?.unit}</div>
+                                                        </td>
+                                                        <td class="px-6 py-4 text-center">
+                                                            <span class="text-green-400 text-sm font-bold">${rateData?.trend}</span>
+                                                        </td>
+                                                        <td class="px-6 py-4 text-center text-gray-400 text-xs">${rateData?.high ? 'H: Rs ' + rateData.high : ''}</td>
+                                                    </tr>
+                                                    `;
+                                                }).join('')
+                                            :
+                                                state.selectedCrops.map(cropId => `
+                                                    <tr class="hover:bg-white/5 transition-colors">
+                                                        <td class="px-6 py-4 text-white font-bold">${crops.find(c => c.id === cropId)?.[state.lang === 'en' ? 'name_en' : 'name_ur']}</td>
+                                                        ${state.selectedMandis.map(mandiId => {
+                                                            const rateData = state.mandiRatesData[cropId]?.[mandiId];
+                                                            return `
+                                                            <td class="px-6 py-4 text-center">
+                                                                <div class="text-emerald-400 font-bold">Rs ${rateData?.rate}</div>
+                                                                <div class="text-green-400 text-xs font-semibold">${rateData?.trend}</div>
+                                                            </td>
+                                                            `;
+                                                        }).join('')}
+                                                    </tr>
+                                                `).join('')
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <button 
+                                onclick="fetchMandiRates()"
+                                class="mt-6 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
+                            >
+                                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                                ${t.mandiRates.refresh[state.lang]}
+                            </button>
+
+                            ${state.lastFetchTime ? `
+                                <p class="text-center text-gray-500 text-xs mt-4">
+                                    ${state.lang === 'en' ? 'Last updated: ' : 'آخری اپڈیٹ: '}${state.lastFetchTime.toLocaleTimeString(state.lang === 'ur' ? 'ur-PK' : 'en-US')}
+                                </p>
+                            ` : ''}
+                        `}
+                    </div>
+                </div>
+            </div>`;
+        };
+
+        const AccountSettings = () => {
+            const menuItems = [
+                { id: 'personal', icon: 'user', label: state.lang === 'en' ? 'Personal Info' : 'ذاتی معلومات' },
+                { id: 'farm', icon: 'leaf', label: state.lang === 'en' ? 'Farm Details' : 'فارم کی تفصیلات' },
+                { id: 'subscription', icon: 'credit-card', label: state.lang === 'en' ? 'Subscription' : 'رکنیت' },
+                { id: 'notifications', icon: 'bell', label: state.lang === 'en' ? 'Notifications' : 'اطلاعات' },
+                { id: 'security', icon: 'shield', label: state.lang === 'en' ? 'Security' : 'حفاظت' },
+                { id: 'logout', icon: 'log-out', label: state.lang === 'en' ? 'Logout' : 'لاگ آؤٹ' },
+            ];
+
+            let contentHTML = '';
+
+            if (state.accountSettingsTab === 'personal') {
+                contentHTML = `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-white mb-8">${state.lang === 'en' ? 'Personal Information' : 'ذاتی معلومات'}</h3>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'First Name' : 'نام'}</label>
+                            <input type="text" value="Ali" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Last Name' : 'سرنام'}</label>
+                            <input type="text" value="Ahmed" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Email' : 'ای میل'}</label>
+                            <input type="email" value="ali.ahmed@example.com" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Phone' : 'فون'}</label>
+                            <input type="tel" value="+92 300 1234567" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? "Father's Name" : "والد کا نام"}</label>
+                            <input type="text" value="Muhammad Ahmed" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'CNIC' : 'شناخت نمبر'}</label>
+                            <input type="text" value="12345-6789012-1" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Bio' : 'تعارف'}</label>
+                        <textarea rows="4" placeholder="${state.lang === 'en' ? 'Tell us about yourself...' : 'اپنے بارے میں بتائیں...'}" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors resize-none"></textarea>
+                    </div>
+
+                    <button class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors shadow-lg">
+                        ${state.lang === 'en' ? 'Save Changes' : 'تبدیلیاں محفوظ کریں'}
+                    </button>
+                </div>`;
+            } else if (state.accountSettingsTab === 'farm') {
+                contentHTML = `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-white mb-8">${state.lang === 'en' ? 'Farm Details' : 'فارم کی تفصیلات'}</h3>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Farm Name' : 'فارم کا نام'}</label>
+                            <input type="text" value="Ahmed's Green Farm" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'District' : 'ضلع'}</label>
+                            <select class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                                <option>Bahawalpur</option>
+                                <option>Lahore</option>
+                                <option>Karachi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Land Size (Acres)' : 'زمین کا رقبہ (ایکڑ)'}</label>
+                            <input type="number" value="15" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Primary Crop' : 'بنیادی فصل'}</label>
+                            <select class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                                <option>Wheat</option>
+                                <option>Rice</option>
+                                <option>Cotton</option>
+                                <option>Maize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Secondary Crop' : 'ثانوی فصل'}</label>
+                            <select class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                                <option>None</option>
+                                <option>Sugarcane</option>
+                                <option>Vegetables</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Irrigation Type' : 'آبپاشی کی قسم'}</label>
+                            <select class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                                <option>Canal Water</option>
+                                <option>Tube Well</option>
+                                <option>Both</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Farm Location (GPS)' : 'فارم کی جگہ'}</label>
+                        <input type="text" value="29.1938° N, 71.6249° E" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                    </div>
+
+                    <button class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors shadow-lg">
+                        ${state.lang === 'en' ? 'Update Farm' : 'فارم کو اپڈیٹ کریں'}
+                    </button>
+                </div>`;
+            } else if (state.accountSettingsTab === 'subscription') {
+                contentHTML = `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-white mb-8">${state.lang === 'en' ? 'Subscription & Billing' : 'رکنیت اور بلنگ'}</h3>
+                    
+                    <div class="bg-gradient-to-r from-emerald-900/40 to-[#022c22] border border-emerald-500/30 p-6 rounded-2xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Current Plan' : 'موجودہ پلان'}</p>
+                                <p class="text-white font-bold text-xl">${state.lang === 'en' ? 'Agri Pro' : 'ایگری پرو'}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Billing Cycle' : 'بلنگ سائیکل'}</p>
+                                <p class="text-emerald-400 font-bold">Rs 1,500/month</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-white/10 pt-4">
+                            <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Renews on' : 'تجدید کی تاریخ'}</p>
+                            <p class="text-white font-bold">December 15, 2025</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-white">${state.lang === 'en' ? 'Plan Features' : 'پلان کی خصوصیات'}</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
+                                <i data-lucide="check" class="w-5 h-5 text-emerald-400"></i>
+                                <span class="text-white text-sm">${state.lang === 'en' ? 'Unlimited AI Scans' : 'لامحدود ای آئی اسکین'}</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
+                                <i data-lucide="check" class="w-5 h-5 text-emerald-400"></i>
+                                <span class="text-white text-sm">${state.lang === 'en' ? 'PDF Reports' : 'پی ڈی ایف رپورٹس'}</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
+                                <i data-lucide="check" class="w-5 h-5 text-emerald-400"></i>
+                                <span class="text-white text-sm">${state.lang === 'en' ? 'Expert Chat Support' : 'ماہر چیٹ سپورٹ'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors border border-white/10">
+                            ${state.lang === 'en' ? 'Upgrade Plan' : 'پلان اپ گریڈ کریں'}
+                        </button>
+                        <button class="flex-1 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold rounded-xl transition-colors border border-red-500/20">
+                            ${state.lang === 'en' ? 'Cancel' : 'منسوخ کریں'}
+                        </button>
+                    </div>
+                </div>`;
+            } else if (state.accountSettingsTab === 'notifications') {
+                contentHTML = `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-white mb-8">${state.lang === 'en' ? 'Notification Settings' : 'اطلاع کی ترتیبات'}</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+                            <div>
+                                <p class="text-white font-bold">${state.lang === 'en' ? 'Disease Alerts' : 'بیماری کی انتباہات'}</p>
+                                <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Get notified of crop diseases' : 'فصل کی بیماریوں کی خبریں'}</p>
+                            </div>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked class="w-5 h-5 rounded border-emerald-500 bg-emerald-500" />
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+                            <div>
+                                <p class="text-white font-bold">${state.lang === 'en' ? 'Market Updates' : 'مارکیٹ کی اپڈیٹ'}</p>
+                                <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Price changes in mandi' : 'منڈی میں قیمت میں تبدیلی'}</p>
+                            </div>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked class="w-5 h-5 rounded border-emerald-500 bg-emerald-500" />
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+                            <div>
+                                <p class="text-white font-bold">${state.lang === 'en' ? 'Weather Alerts' : 'موسم کی انتباہات'}</p>
+                                <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Severe weather warnings' : 'شدید موسم کی انتباہات'}</p>
+                            </div>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked class="w-5 h-5 rounded border-emerald-500 bg-emerald-500" />
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+                            <div>
+                                <p class="text-white font-bold">${state.lang === 'en' ? 'Tips & Updates' : 'تجاویز اور اپڈیٹ'}</p>
+                                <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Farming tips and app updates' : 'کاشتکاری کی تجاویز'}</p>
+                            </div>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" class="w-5 h-5 rounded border-emerald-500" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors shadow-lg">
+                        ${state.lang === 'en' ? 'Save Preferences' : 'ترجیحات محفوظ کریں'}
+                    </button>
+                </div>`;
+            } else if (state.accountSettingsTab === 'security') {
+                contentHTML = `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-white mb-8">${state.lang === 'en' ? 'Security Settings' : 'حفاظت کی ترتیبات'}</h3>
+                    
+                    <div>
+                        <h4 class="font-bold text-white mb-4">${state.lang === 'en' ? 'Change Password' : 'پاس ورڈ تبدیل کریں'}</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Current Password' : 'موجودہ پاس ورڈ'}</label>
+                                <input type="password" placeholder="••••••••" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'New Password' : 'نیا پاس ورڈ'}</label>
+                                <input type="password" placeholder="••••••••" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-sm font-bold mb-2">${state.lang === 'en' ? 'Confirm Password' : 'پاس ورڈ کی تصدیق'}</label>
+                                <input type="password" placeholder="••••••••" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                            </div>
+                        </div>
+                        <button class="mt-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors shadow-lg w-full">
+                            ${state.lang === 'en' ? 'Update Password' : 'پاس ورڈ اپڈیٹ کریں'}
+                        </button>
+                    </div>
+
+                    <div class="border-t border-white/10 pt-6">
+                        <h4 class="font-bold text-white mb-4">${state.lang === 'en' ? 'Two-Factor Authentication' : 'دو عاملی تصدیق'}</h4>
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 mb-4">
+                            <div>
+                                <p class="text-white font-bold">${state.lang === 'en' ? 'Enable 2FA' : '2FA فعال کریں'}</p>
+                                <p class="text-gray-400 text-sm">${state.lang === 'en' ? 'Add extra security to your account' : 'اپنے اکاؤنٹ میں اضافی حفاظت'}</p>
+                            </div>
+                            <button class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-sm">
+                                ${state.lang === 'en' ? 'Enable' : 'فعال کریں'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-white/10 pt-6">
+                        <h4 class="font-bold text-white mb-4">${state.lang === 'en' ? 'Active Sessions' : 'فعال سیشن'}</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                                <div>
+                                    <p class="text-white text-sm font-bold">${state.lang === 'en' ? 'Chrome on Windows' : 'ونڈوز پر کروم'}</p>
+                                    <p class="text-gray-500 text-xs">${state.lang === 'en' ? 'Current session' : 'موجودہ سیشن'}</p>
+                                </div>
+                            </div>
+                            <button class="w-full py-2 text-red-400 border border-red-500/30 rounded-lg text-sm font-bold hover:bg-red-500/10 transition-colors">
+                                ${state.lang === 'en' ? 'Logout from all devices' : 'تمام ڈیوائسز سے لاگ آؤٹ'}</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            return `
+            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 ${!state.showAccountSettings ? 'hidden' : ''}">
+                <div class="bg-[#022c22] rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex border border-white/10 shadow-2xl animate-fade-in-up">
+                    
+                    <!-- Sidebar -->
+                    <div class="w-full md:w-72 bg-gradient-to-b from-[#064e3b]/80 to-[#022c22] border-r border-white/10 flex flex-col p-6 overflow-y-auto">
+                        <!-- Profile Header -->
+                        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-white/10">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg">
+                                <i data-lucide="user" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-white font-bold truncate">${state.lang === 'en' ? 'Ali Ahmed' : 'علی احمد'}</p>
+                                <p class="text-emerald-400 text-xs">${state.lang === 'en' ? 'Agri Pro Member' : 'ایگری پرو رکن'}</p>
+                            </div>
+                            <button onclick="toggleAccountSettings()" class="text-gray-400 hover:text-white transition-colors">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+
+                        <!-- Menu Items -->
+                        <div class="space-y-2 flex-1">
+                            ${menuItems.map(item => `
+                                <button 
+                                    onclick="setAccountTab('${item.id}')"
+                                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                                        state.accountSettingsTab === item.id 
+                                        ? 'bg-emerald-600 text-white shadow-lg' 
+                                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                    } ${item.id === 'logout' ? 'text-red-400 hover:bg-red-500/10' : ''}"
+                                >
+                                    <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                                    <span class="font-bold text-sm">${item.label}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <!-- Footer Info -->
+                        <div class="border-t border-white/10 pt-4 mt-4">
+                            <p class="text-gray-500 text-xs text-center">${state.lang === 'en' ? 'Need Help?' : 'مدد چاہیے؟'}</p>
+                            <button class="w-full mt-2 text-emerald-400 hover:text-emerald-300 text-xs font-bold">
+                                ${state.lang === 'en' ? 'Contact Support' : 'سپورٹ سے رابطہ کریں'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content Area -->
+                    <div class="flex-1 bg-[#022c22] overflow-y-auto">
+                        <div class="p-8">
+                            ${contentHTML}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        };
+
+         const Footer = () => {
+            return `
+            <footer class="border-t border-white/5 bg-black/40 py-16 text-center text-gray-500 text-sm backdrop-blur-sm mt-auto">
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <div class="bg-emerald-900/50 p-2 rounded-lg"><i data-lucide="leaf" class="text-emerald-500 w-6 h-6"></i></div>
+                    <span class="text-white font-bold text-2xl tracking-tight">AgriVerse</span>
+                </div>
+                <p class="opacity-80 text-white font-bold mb-2">${t.footer.slogan[state.lang]}</p>
+                <p class="opacity-60 mb-2">${t.footer.aboutDesc[state.lang]}</p>
+                <p class="opacity-60">© 2025 AgriVerse Pakistan. All rights reserved.</p>
+                <div class="flex justify-center gap-8 mt-6 text-xs font-bold uppercase tracking-widest text-emerald-500/70">
+                    <span class="hover:text-emerald-400 cursor-pointer transition-colors">Privacy</span>
+                    <span class="hover:text-emerald-400 cursor-pointer transition-colors">Terms</span>
+                    <span class="hover:text-emerald-400 cursor-pointer transition-colors">Support</span>
+                </div>
+            </footer>
+            `;
+        };
+
+        // --- Main Render Function ---
+
+        function renderApp() {
+            const app = document.getElementById('app');
+            let pageContent = '';
+
+            switch(state.currentPage) {
+                case 'home': pageContent = Hero(); break;
+                case 'features': pageContent = Features(); break;
+                case 'scan': pageContent = AIScan(); break;
+                case 'pricing': pageContent = Pricing(); break;
+                case 'demo': pageContent = Demo(); break;
+                case 'signup': pageContent = Signup(); break;
+                case 'weather': pageContent = WeatherGuidance(); break;
+                case 'knowledge-hub': pageContent = KnowledgeHub(); break;
+                case 'mandi-rates': pageContent = MandiRates(); break;
+                case 'dashboard': pageContent = Dashboard(); break;
+                case 'contact': pageContent = Contact(); break;
+                case 'profile': pageContent = Profile(); break;
+                default: pageContent = Hero();
+            }
+
+            const floatingButton = `
+            <div class="fixed bottom-8 right-8 z-40 flex flex-col items-end gap-4">
+                ${state.showContactPanel ? `
+                    <div class="glass-panel p-6 rounded-3xl border border-emerald-500/30 w-80 shadow-2xl animate-fade-in-up">
+                        <button onclick="toggleContactPanel()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                        <h3 class="text-lg font-bold text-white mb-4">${state.lang === 'en' ? 'Quick Contact' : 'فوری رابطہ'}</h3>
+                        <div class="space-y-3">
+                            <a href="tel:08001234567" class="flex items-center gap-3 p-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-bold transition-colors">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                                <span>${state.lang === 'en' ? 'Call Now' : 'ابھی کال کریں'}</span>
+                            </a>
+                            <a href="https://wa.me/923001234567" target="_blank" class="flex items-center gap-3 p-3 bg-[#25D366] hover:bg-[#20bd5a] rounded-xl text-white font-bold transition-colors">
+                                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                                <span>${state.lang === 'en' ? 'WhatsApp' : 'واٹس ایپ'}</span>
+                            </a>
+                            <button onclick="setPage('contact')" class="w-full p-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-bold transition-colors">
+                                ${state.lang === 'en' ? 'Email Us' : 'ای میل کریں'}
+                            </button>
+                        </div>
+                    </div>
+                ` : ''}
+                <button 
+                    onclick="toggleContactPanel()"
+                    class="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-110 border-2 border-emerald-400/50"
+                >
+                    <i data-lucide="headphones" class="w-7 h-7"></i>
+                </button>
+            </div>`;
+
+            app.innerHTML = `
+                ${Navbar()}
+                <main class="animate-in fade-in duration-500">
+                    ${pageContent}
+                </main>
+                ${floatingButton}
+                ${AccountSettings()}
+                ${Footer()}
+            `;
+
+            // Initialize Icons
+            lucide.createIcons();
+        }
+
+        // Initial Render
+        renderApp();
+
+        // Expose functions to window for onclick handlers
+        window.setPage = setPage;
+        window.setLang = setLang;
+        window.setScanMode = setScanMode;
+        window.handleScan = handleScan;
+        window.resetScan = resetScan;
+        window.setSignupStep = setSignupStep;
+        window.toggleContactPanel = toggleContactPanel;
+        window.toggleAccountSettings = toggleAccountSettings;
+        window.setAccountTab = setAccountTab;
+        window.setMandiRatesMode = setMandiRatesMode;
+        window.toggleCropSelection = toggleCropSelection;
+        window.toggleMandiSelection = toggleMandiSelection;
+        window.fetchMandiRates = fetchMandiRates;
+        window.setKnowledgeHubTab = setKnowledgeHubTab;
+        window.setKnowledgeSearchQuery = setKnowledgeSearchQuery;
+        window.openKnowledgeArticle = openKnowledgeArticle;
+        window.closeKnowledgeArticle = closeKnowledgeArticle;
+        window.loadWeatherForDistrict = loadWeatherForDistrict;
+    })();
+    </script>
+</body>
+</html>
